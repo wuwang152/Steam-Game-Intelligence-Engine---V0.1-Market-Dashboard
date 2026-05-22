@@ -8,7 +8,7 @@ A serious, reproducible analytics project for understanding the Steam games mark
 - Publish a **Streamlit dashboard** to explore release patterns, attention, pricing, and reputation.
 
 ## Project structure
-- `data/` - raw and processed datasets (raw large files are ignored in git)
+- `data/` - raw and processed datasets (large raw source files should not be committed to git)
 - `docs/` - documentation and design notes
 - `reports/` - exported analysis outputs and summaries
 - `notebooks/` - exploratory and audit notebooks
@@ -26,30 +26,30 @@ Expected raw columns include:
 python -m venv .venv
 source .venv/bin/activate
 pip install -U pip
-pip install pandas streamlit pytest
-export PYTHONPATH=src
+pip install -r requirements.txt
 ```
 
-## Usage
-1. Place raw CSV at: `data/raw/steam_games.csv`
-2. Run cleaning + feature pipeline:
-   ```bash
-   PYTHONPATH=src python scripts/run_pipeline.py
-   ```
-3. Validate processed data:
-   ```bash
-   PYTHONPATH=src python scripts/validate_data.py
-   ```
-4. Launch dashboard:
-   ```bash
-   streamlit run app/Home.py
-   ```
-5. Open notebook `notebooks/01_data_audit.ipynb` for initial data audit.
+## Usage (sample dataset)
+```bash
+PYTHONPATH=src python scripts/run_pipeline.py --input data/sample/games_sample.csv --output data/processed/steam_games_cleaned.csv
+PYTHONPATH=src python scripts/validate_data.py --input data/processed/steam_games_cleaned.csv
+PYTHONPATH=src pytest -q
+streamlit run app/Home.py
+```
+
+## Usage (Windows PowerShell)
+```powershell
+$env:PYTHONPATH="src"
+python scripts/run_pipeline.py --input data/sample/games_sample.csv --output data/processed/steam_games_cleaned.csv
+python scripts/validate_data.py --input data/processed/steam_games_cleaned.csv
+pytest -q
+streamlit run app/Home.py
+```
 
 ## V0.1 engineered features
 - `release_year`
 - `owners_low`, `owners_high`, `owners_mid`
-- `total_reviews`, `positive_ratio`, `review_signal`
+- `total_reviews`, `positive_ratio`, `review_signal`, `review_sentiment`
 - `price_bucket`
 - `platform_count`
 - `genre_count`, `tag_count`
@@ -61,6 +61,9 @@ export PYTHONPATH=src
 - `Price >= 0`.
 - `positive_ratio` is in `[0, 1]`.
 - `owners_low <= owners_high`.
+
+## Data handling note
+- Do not commit large raw datasets to git; keep them local (for example under `data/raw/`) and only commit small synthetic/sample files needed for reproducible examples.
 
 ## Limitations
 - V0.1 uses simple parsing heuristics for list-like text columns.

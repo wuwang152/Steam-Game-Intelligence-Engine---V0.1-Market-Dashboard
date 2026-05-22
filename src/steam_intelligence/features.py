@@ -48,6 +48,12 @@ def add_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
     out["positive_ratio"] = out["positive_ratio"].fillna(0)
 
     out["review_signal"] = pd.cut(
+        out["total_reviews"],
+        bins=[-0.1, 0, 19, 99, 999, float("inf")],
+        labels=["no_signal", "very_low", "low", "medium", "high"],
+    )
+
+    out["review_sentiment"] = pd.cut(
         out["positive_ratio"],
         bins=[-0.01, 0.4, 0.7, 1.0],
         labels=["weak", "mixed", "strong"],
