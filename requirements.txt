@@ -1,0 +1,7 @@
+pandas
+numpy
+streamlit
+pytest
+jupyter
+notebook
+matplotlib
