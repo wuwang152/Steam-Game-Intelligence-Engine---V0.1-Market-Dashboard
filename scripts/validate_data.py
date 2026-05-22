@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
+import argparse
 import sys
+from pathlib import Path
+
 import pandas as pd
 from steam_intelligence.config import PROCESSED_DATA_PATH
 
@@ -34,8 +37,15 @@ def run_checks(df: pd.DataFrame) -> list[str]:
     return errors
 
 
+def parse_args() -> argparse.Namespace:
+    parser = argparse.ArgumentParser(description="Validate processed Steam dataset")
+    parser.add_argument("--input", type=Path, default=PROCESSED_DATA_PATH, help="Path to processed CSV")
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
-    df = pd.read_csv(PROCESSED_DATA_PATH)
+    args = parse_args()
+    df = pd.read_csv(args.input)
     failures = run_checks(df)
     if failures:
         print("Validation failed:")
