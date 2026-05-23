@@ -116,5 +116,3 @@ GitHub Actions is configured to run repository checks on pushes and pull request
 - Add additional market signals and higher-level composite indicators.
 - Increase automated test coverage across pipeline stages.
 
-## Dashboard screenshots (placeholder)
-Screenshots will be added in a future update after dedicated dashboard visual QA and capture.
