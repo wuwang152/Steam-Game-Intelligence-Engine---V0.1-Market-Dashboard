@@ -4,12 +4,16 @@ All notable changes to this project are documented in this file.
 
 ## [0.1.0] - 2026-05-23
 ### Added
-- Initial reproducible data pipeline for Steam dataset cleaning and feature engineering.
-- CLI workflow for deterministic processing output generation.
-- Data validation script with schema and value-quality checks.
-- Unit tests for core feature-engineering behavior.
-- Multi-page Streamlit market dashboard scaffold and analysis pages.
-- Sample dataset for reproducible local demonstration via `data/sample/games_sample.csv`.
+- Reproducible Steam data cleaning and feature-engineering pipeline.
+- Validation script for processed output schema and data-quality checks.
+- Pytest coverage for feature-engineering behavior and edge cases.
+- GitHub Actions CI for automated repository checks.
+- Multi-page Streamlit dashboard for market exploration.
+- Dashboard screenshots in README (`docs/assets/dashboard_home.png`, `docs/assets/dashboard_attention.png`, `docs/assets/dashboard_genre_tag.png`).
+- Support for full raw datasets placed under `data/raw/`.
+
+### Improved
+- Home dashboard visibility improvements, including column alias handling, readable price buckets, and compact preview table behavior.
 
 ### Notes
-- Full raw datasets should be placed under `data/raw/` and are intentionally not committed when large.
+- Large raw datasets should remain under `data/raw/` and should not be committed.
