@@ -80,6 +80,17 @@ V0.1 dashboard modules:
 
 These modules provide baseline market exploration views for pricing, release cadence, review activity, and genre/tag distribution.
 
+## Dashboard screenshots
+
+### Home dashboard
+![Home dashboard](docs/assets/dashboard_home.png)
+
+### Attention distribution
+![Attention distribution](docs/assets/dashboard_attention.png)
+
+### Genre and tag explorer
+![Genre and tag explorer](docs/assets/dashboard_genre_tag.png)
+
 ## Testing and CI
 ### Local testing
 Use the same project commands for local validation:
