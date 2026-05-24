@@ -122,3 +122,4 @@ GitHub Actions is configured to run repository checks on pushes and pull request
 - V0.2 development has started.
 - V0.2 Step 1 delivered the analytical feature foundation.
 - V0.2 Step 2 adds a dedicated **Market Insights** Streamlit page that uses these features for filtered KPI and market-structure analysis while preserving V0.1 dashboard stability.
+- V0.2 Step 3 adds lightweight visualization polish for Market Insights with clearer filtering, KPI, chart, and ranking sections while keeping the implementation simple and stable.

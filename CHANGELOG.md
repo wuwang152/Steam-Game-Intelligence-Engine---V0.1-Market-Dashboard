@@ -9,6 +9,7 @@ All notable changes to this project are documented in this file.
 - V0.2 roadmap document (`docs/v0.2_roadmap.md`).
 
 ### Improved
+- V0.2 Step 3 lightweight Market Insights visualization polish with clearer sectioning, filter summary, KPI formatting, chart grouping tabs, and ranking/hidden-gem presentation updates.
 - Validation checks expanded for V0.2 analytical columns and value constraints.
 - Test coverage expanded for mixed-type, missing-value, and edge-case feature engineering inputs.
 
