@@ -21,6 +21,7 @@ REQUIRED_COLUMNS = [
     "total_reviews",
     "positive_rate",
     "review_log",
+    "has_reviews",
     "is_free",
     "has_discount",
     "platform_count",
@@ -67,8 +68,21 @@ def run_checks(df: pd.DataFrame) -> list[str]:
     if ((years < 1980) | (years > 2100)).any():
         errors.append("release_year must be in a reasonable range [1980, 2100] where non-null")
 
+    owners_low = df["owners_low"].dropna()
+    owners_high = df["owners_high"].dropna()
+    if (owners_low < 0).any():
+        errors.append("owners_low must be non-negative where non-null")
+    if (owners_high < 0).any():
+        errors.append("owners_high must be non-negative where non-null")
+
     if (df["owners_low"] > df["owners_high"]).any():
         errors.append("owners_low cannot exceed owners_high")
+
+    owner_triplet = df[["owners_low", "owners_high", "owners_mid"]].dropna()
+    if not owner_triplet.empty:
+        expected_mid = (owner_triplet["owners_low"] + owner_triplet["owners_high"]) / 2
+        if not ((owner_triplet["owners_mid"] - expected_mid).abs() < 1e-9).all():
+            errors.append("owners_mid must equal midpoint of owners_low and owners_high where all are non-null")
 
     if len(df) == 0:
         errors.append("Processed dataset is empty")

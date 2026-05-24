@@ -12,7 +12,7 @@ def _to_numeric(series: pd.Series, default: float = np.nan) -> pd.Series:
     cleaned = (
         series.astype(str)
         .str.replace(",", "", regex=False)
-        .str.replace("$", "", regex=False)
+        .str.replace(r"[^0-9.\-]", "", regex=True)
         .str.strip()
         .replace({"": np.nan, "none": np.nan, "nan": np.nan, "null": np.nan})
     )
@@ -76,6 +76,7 @@ def add_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
     positive = _to_numeric(out.get("Positive", pd.Series(0, index=out.index)), default=0).clip(lower=0)
     negative = _to_numeric(out.get("Negative", pd.Series(0, index=out.index)), default=0).clip(lower=0)
     out["total_reviews"] = positive + negative
+    out["has_reviews"] = out["total_reviews"] > 0
     out["positive_rate"] = (positive / out["total_reviews"].replace(0, np.nan)).fillna(0)
     out["positive_ratio"] = out["positive_rate"]
     out["review_log"] = np.log1p(out["total_reviews"]).fillna(0)
@@ -91,6 +92,8 @@ def add_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
         bins=[-0.01, 0.4, 0.7, 1.0],
         labels=["weak", "mixed", "strong"],
     )
+    out["review_sentiment"] = out["review_sentiment"].cat.add_categories(["no_reviews"])
+    out.loc[~out["has_reviews"], "review_sentiment"] = "no_reviews"
 
     price = _to_numeric(out.get("Price", pd.Series(0, index=out.index)), default=0).clip(lower=0)
     discount = _to_numeric(out.get("Discount", pd.Series(0, index=out.index)), default=0).clip(lower=0)
@@ -100,7 +103,7 @@ def add_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
     out["price_bucket"] = pd.cut(
         price,
         bins=[-0.01, 0, 9.99, 29.99, 59.99, float("inf")],
-        labels=["Free", "Low", "Medium", "High", "Premium"],
+        labels=["free", "budget", "mid", "premium", "luxury"],
     )
 
     platforms = pd.DataFrame({
