@@ -10,11 +10,28 @@ import pandas as pd
 from steam_intelligence.config import PROCESSED_DATA_PATH
 
 
+REQUIRED_COLUMNS = [
+    "AppID",
+    "Name",
+    "Price",
+    "release_year",
+    "owners_low",
+    "owners_high",
+    "owners_mid",
+    "total_reviews",
+    "positive_rate",
+    "review_log",
+    "is_free",
+    "has_discount",
+    "platform_count",
+    "price_bucket",
+]
+
+
 def run_checks(df: pd.DataFrame) -> list[str]:
     errors: list[str] = []
 
-    required = ["AppID", "Name", "release_year", "Price", "positive_ratio", "owners_low", "owners_high"]
-    missing_cols = [col for col in required if col not in df.columns]
+    missing_cols = [col for col in REQUIRED_COLUMNS if col not in df.columns]
     if missing_cols:
         errors.append(f"Missing required columns: {missing_cols}")
         return errors
@@ -28,11 +45,33 @@ def run_checks(df: pd.DataFrame) -> list[str]:
     if (df["Price"].fillna(0) < 0).any():
         errors.append("Price contains negative values")
 
-    if ((df["positive_ratio"] < 0) | (df["positive_ratio"] > 1)).any():
-        errors.append("positive_ratio must be in [0, 1]")
+    if (df["total_reviews"].fillna(0) < 0).any():
+        errors.append("total_reviews must be non-negative")
+
+    rate = df["positive_rate"].dropna()
+    if ((rate < 0) | (rate > 1)).any():
+        errors.append("positive_rate must be in [0, 1] where non-null")
+
+    if (df["review_log"].fillna(0) < 0).any():
+        errors.append("review_log must be non-negative")
+
+    pc = df["platform_count"].dropna()
+    if ((pc < 0) | (pc > 3)).any():
+        errors.append("platform_count must be in [0, 3]")
+
+    owners_mid = df["owners_mid"].dropna()
+    if (owners_mid < 0).any():
+        errors.append("owners_mid must be non-negative where non-null")
+
+    years = df["release_year"].dropna()
+    if ((years < 1980) | (years > 2100)).any():
+        errors.append("release_year must be in a reasonable range [1980, 2100] where non-null")
 
     if (df["owners_low"] > df["owners_high"]).any():
         errors.append("owners_low cannot exceed owners_high")
+
+    if len(df) == 0:
+        errors.append("Processed dataset is empty")
 
     return errors
 

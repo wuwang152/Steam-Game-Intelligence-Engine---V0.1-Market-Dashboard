@@ -116,3 +116,7 @@ GitHub Actions is configured to run repository checks on pushes and pull request
 - Add additional market signals and higher-level composite indicators.
 - Increase automated test coverage across pipeline stages.
 
+
+## V0.2 development status
+- V0.2 development has started.
+- The first V0.2 task is the analytical feature foundation for future Market Insights pages, while preserving V0.1 dashboard stability.
