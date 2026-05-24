@@ -14,6 +14,7 @@ All notable changes to this project are documented in this file.
 - V0.2 Step 5 dashboard consistency and readability patch: aligned user-facing terminology (Positive Rate, Total Reviews, Price Bucket, Review Signal, Review Sentiment), added stable category ordering, replaced log-scale owners chart with readable ownership tiers, and added concise interpretation notes across key charts/pages.
 - Validation checks expanded for V0.2 analytical columns and value constraints.
 - Test coverage expanded for mixed-type, missing-value, and edge-case feature engineering inputs.
+- V0.2 Step 7 documentation cleanup: refreshed README positioning/version wording, added V0.2 feature summary and report linkage, expanded cross-platform command examples (Bash + PowerShell), clarified interpretation notes, and updated V0.3 roadmap framing.
 
 ## [0.1.0] - 2026-05-23
 ### Added
