@@ -7,6 +7,7 @@ All notable changes to this project are documented in this file.
 - V0.2 analytical feature foundation kickoff with robust feature-engineering fields for market insights, including has_reviews.
 - V0.2 Step 2 Market Insights Streamlit page (`app/pages/7_Market_Insights.py`) with V0.2 feature-aware filtering, KPI cards, market charts, scatter analysis, and top-game tables.
 - V0.2 roadmap document (`docs/v0.2_roadmap.md`).
+- V0.2 Step 4 reproducible Market Insights report generation script (`scripts/generate_market_report.py`) and report artifact output (`reports/steam_market_insights_v0.2.md`).
 
 ### Improved
 - V0.2 Step 3 lightweight Market Insights visualization polish with clearer sectioning, filter summary, KPI formatting, chart grouping tabs, and ranking/hidden-gem presentation updates.

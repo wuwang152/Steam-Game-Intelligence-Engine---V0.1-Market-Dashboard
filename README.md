@@ -123,3 +123,9 @@ GitHub Actions is configured to run repository checks on pushes and pull request
 - V0.2 Step 1 delivered the analytical feature foundation.
 - V0.2 Step 2 adds a dedicated **Market Insights** Streamlit page that uses these features for filtered KPI and market-structure analysis while preserving V0.1 dashboard stability.
 - V0.2 Step 3 adds lightweight visualization polish for Market Insights with clearer filtering, KPI, chart, and ranking sections while keeping the implementation simple and stable.
+- V0.2 Step 4 adds a reproducible Markdown Market Insights report generation workflow based on the available processed dataset.
+
+Generate the report with:
+```bash
+PYTHONPATH=src python scripts/generate_market_report.py --input data/processed/steam_games_cleaned.csv --output reports/steam_market_insights_v0.2.md
+```
