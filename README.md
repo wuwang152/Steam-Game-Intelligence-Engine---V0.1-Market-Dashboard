@@ -1,12 +1,9 @@
-# Steam Game Intelligence Engine (V0.1 Market Dashboard)
+# Steam Game Intelligence Engine (V0.2 Market Intelligence)
 
 ## Project overview
-Steam Game Intelligence Engine V0.1 is a reproducible analytics project for Steam game-market exploration. It combines:
+Steam Game Intelligence Engine is a reproducible Steam game market intelligence project with data cleaning, analytical feature engineering, Streamlit dashboard pages, and a Markdown market insights report.
 
-- a deterministic data cleaning and feature engineering pipeline, and
-- a Streamlit dashboard for interactive market analysis.
-
-The V0.1 release focuses on preprocessing reliability, feature consistency, and baseline dashboard usability. It is not yet a personalized recommendation system.
+The project is currently in **V0.2 development**, focused on consistent descriptive analytics workflows and presentation-ready market exploration outputs.
 
 ## Feature summary
 - **Cleaning pipeline:** standardized typing, platform flag normalization, and row-level hygiene checks.
@@ -14,6 +11,12 @@ The V0.1 release focuses on preprocessing reliability, feature consistency, and 
 - **Validation layer:** script-based checks for schema completeness and key data-quality constraints.
 - **Automated tests:** unit tests covering feature-engineering behavior and edge-case handling.
 - **Dashboard modules:** multi-page Streamlit interface for release, pricing, reputation, and genre/tag exploration.
+
+## V0.2 current feature summary
+- **Analytical features:** `owners_mid`, `total_reviews`, `positive_rate`, `has_reviews`, `price_bucket`, `review_signal`, `review_sentiment`, `platform_count`
+- **Market Insights dashboard page:** dedicated V0.2 page for filtered KPIs, distributions, ranking views, and heuristic candidate exploration (`app/pages/7_Market_Insights.py`)
+- **Reproducible report generation workflow:** script-driven Markdown report build from processed data
+- **Full processed-data report artifact:** `reports/steam_market_insights_v0.2.md`
 
 ## Repository structure
 - `.github/workflows/` — CI workflow definitions.
@@ -67,8 +70,26 @@ PYTHONPATH=src pytest -q
 PYTHONPATH=src streamlit run app/Home.py
 ```
 
+### PowerShell equivalents (Windows)
+```powershell
+# Set PYTHONPATH for current PowerShell session
+$env:PYTHONPATH = "src"
+
+# Run tests
+python -m pytest -q
+
+# Run validation
+python .\scripts\validate_data.py --input .\data\processed\steam_games_cleaned.csv
+
+# Generate the V0.2 market report
+python .\scripts\generate_market_report.py --input .\data\processed\steam_games_cleaned.csv --output .\reports\steam_market_insights_v0.2.md
+
+# Launch Streamlit
+streamlit run .\app\Home.py
+```
+
 ## Dashboard overview
-V0.1 dashboard modules:
+V0.2 dashboard modules:
 
 - `app/Home.py`
 - `app/pages/1_Overview.py`
@@ -80,6 +101,11 @@ V0.1 dashboard modules:
 - `app/pages/7_Market_Insights.py`
 
 These modules provide baseline market exploration views for pricing, release cadence, review activity, and genre/tag distribution.
+
+## Market insights report
+- V0.2 report artifact: [`reports/steam_market_insights_v0.2.md`](reports/steam_market_insights_v0.2.md)
+- Generation input: `data/processed/steam_games_cleaned.csv`
+- Method scope: descriptive metrics only (no causal inference, no machine learning predictions in the current report)
 
 ## Dashboard screenshots
 
@@ -105,25 +131,26 @@ PYTHONPATH=src pytest -q
 GitHub Actions is configured to run repository checks on pushes and pull requests, including dependency installation and automated test/validation steps.
 
 ## Limitations
-- Owner ranges are inferred from string intervals and remain approximate.
-- Transformations are rules-based and intentionally lightweight for V0.1.
-- Dashboard capabilities are baseline and focused on descriptive exploration.
-- V0.1 does not yet implement recommendation or ranking personalization.
+- `owners_mid` is an estimated midpoint of owner ranges, not exact sales.
+- `positive_rate` is most meaningful for games with reviews.
+- Hidden gems are heuristic candidates, not machine learning predictions.
+- Current analysis is descriptive, not causal.
 
 ## Roadmap
-- Expand data-quality validations and edge-case guardrails.
-- Improve dashboard interactivity and comparative slicing.
-- Scale workflows for full raw datasets placed under `data/raw/`.
-- Add additional market signals and higher-level composite indicators.
-- Increase automated test coverage across pipeline stages.
+- **V0.3 direction:** game segmentation.
+- **V0.3 direction:** ranking score system.
+- **V0.3 direction:** genre/tag opportunity analysis.
+- **V0.3 direction:** predictive modeling later (after descriptive analytics baselines are stable).
 
 
 ## V0.2 development status
-- V0.2 development has started.
 - V0.2 Step 1 delivered the analytical feature foundation.
-- V0.2 Step 2 adds a dedicated **Market Insights** Streamlit page that uses these features for filtered KPI and market-structure analysis while preserving V0.1 dashboard stability.
-- V0.2 Step 3 adds lightweight visualization polish for Market Insights with clearer filtering, KPI, chart, and ranking sections while keeping the implementation simple and stable.
-- V0.2 Step 4 adds a reproducible Markdown Market Insights report generation workflow based on the available processed dataset.
+- V0.2 Step 2 added a dedicated **Market Insights** Streamlit page for filtered KPI and market-structure analysis.
+- V0.2 Step 3 added lightweight visualization polish for clearer filtering, KPI, chart, and ranking sections.
+- V0.2 Step 4 added a reproducible Markdown Market Insights report generation workflow.
+- V0.2 Step 5 improved dashboard consistency and readability.
+- V0.2 Step 6 regenerated the full processed-data Market Insights report artifact.
+- V0.2 Step 7 focuses on README and project presentation cleanup.
 
 Generate the report with:
 ```bash
