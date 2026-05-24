@@ -77,6 +77,7 @@ V0.1 dashboard modules:
 - `app/pages/4_Price_and_Monetization.py`
 - `app/pages/5_Reputation_Signals.py`
 - `app/pages/6_Genre_Tag_Explorer.py`
+- `app/pages/7_Market_Insights.py`
 
 These modules provide baseline market exploration views for pricing, release cadence, review activity, and genre/tag distribution.
 
@@ -119,4 +120,5 @@ GitHub Actions is configured to run repository checks on pushes and pull request
 
 ## V0.2 development status
 - V0.2 development has started.
-- The first V0.2 task is the analytical feature foundation for future Market Insights pages, while preserving V0.1 dashboard stability.
+- V0.2 Step 1 delivered the analytical feature foundation.
+- V0.2 Step 2 adds a dedicated **Market Insights** Streamlit page that uses these features for filtered KPI and market-structure analysis while preserving V0.1 dashboard stability.

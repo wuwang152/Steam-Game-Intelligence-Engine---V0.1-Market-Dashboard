@@ -5,6 +5,7 @@ All notable changes to this project are documented in this file.
 ## [0.2.0-unreleased] - 2026-05-24
 ### Added
 - V0.2 analytical feature foundation kickoff with robust feature-engineering fields for market insights, including has_reviews.
+- V0.2 Step 2 Market Insights Streamlit page (`app/pages/7_Market_Insights.py`) with V0.2 feature-aware filtering, KPI cards, market charts, scatter analysis, and top-game tables.
 - V0.2 roadmap document (`docs/v0.2_roadmap.md`).
 
 ### Improved
