@@ -3,7 +3,7 @@
 ## Project overview
 Steam Game Intelligence Engine is a reproducible Steam game market intelligence project with data cleaning, analytical feature engineering, Streamlit dashboard pages, and a Markdown market insights report.
 
-The project is currently in **V0.2 development**, focused on consistent descriptive analytics workflows and presentation-ready market exploration outputs.
+The project is currently at **V0.2.0 release**, focused on consistent descriptive analytics workflows and presentation-ready market exploration outputs.
 
 ## Feature summary
 - **Cleaning pipeline:** standardized typing, platform flag normalization, and row-level hygiene checks.
@@ -105,6 +105,7 @@ These modules provide baseline market exploration views for pricing, release cad
 ## Market insights report
 - V0.2 report artifact: [`reports/steam_market_insights_v0.2.md`](reports/steam_market_insights_v0.2.md)
 - Generation input: `data/processed/steam_games_cleaned.csv`
+- Generation script: `scripts/generate_market_report.py`
 - Method scope: descriptive metrics only (no causal inference, no machine learning predictions in the current report)
 
 ## Dashboard screenshots
