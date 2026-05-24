@@ -12,6 +12,7 @@ if "release_year" not in df.columns or not df["release_year"].notna().any():
 release_counts = df.groupby("release_year", dropna=True).size().rename("games").sort_index()
 st.subheader("Games Released by Year")
 st.caption("This shows how many games were released each year in the processed dataset.")
+st.caption("Recent and future release years may be incomplete.")
 st.line_chart(release_counts)
 
 if "Price" in df.columns:
@@ -24,6 +25,7 @@ if "Price" in df.columns:
 if "positive_ratio" in df.columns:
     yearly_ratio = df.groupby("release_year", dropna=True)["positive_ratio"].median().dropna().sort_index()
     if not yearly_ratio.empty:
-        st.subheader("Median Positive Ratio by Year")
+        st.subheader("Median Positive Rate by Year")
         st.caption("This line summarizes how median player sentiment changed by release year.")
+        st.caption("Positive Rate is most meaningful for games with reviews.")
         st.line_chart(yearly_ratio)

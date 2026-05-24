@@ -11,6 +11,7 @@ All notable changes to this project are documented in this file.
 
 ### Improved
 - V0.2 Step 3 lightweight Market Insights visualization polish with clearer sectioning, filter summary, KPI formatting, chart grouping tabs, and ranking/hidden-gem presentation updates.
+- V0.2 Step 5 dashboard consistency and readability patch: aligned user-facing terminology (Positive Rate, Total Reviews, Price Bucket, Review Signal, Review Sentiment), added stable category ordering, replaced log-scale owners chart with readable ownership tiers, and added concise interpretation notes across key charts/pages.
 - Validation checks expanded for V0.2 analytical columns and value constraints.
 - Test coverage expanded for mixed-type, missing-value, and edge-case feature engineering inputs.
 

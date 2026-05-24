@@ -2,12 +2,17 @@ import streamlit as st
 
 from app.utils import get_available_columns, require_processed_data
 
+PRICE_BUCKET_ORDER = ["free", "budget", "mid", "premium", "luxury"]
+
 st.title("Price and Monetization")
 df = require_processed_data()
 
 if "price_bucket" in df.columns:
     st.subheader("Price Bucket Distribution")
-    st.bar_chart(df["price_bucket"].fillna("Unknown").value_counts())
+    bucket_series = df["price_bucket"].fillna("Unknown").astype(str)
+    ordered = [x for x in PRICE_BUCKET_ORDER if x in bucket_series.unique()]
+    remainder = sorted([x for x in bucket_series.unique() if x not in ordered])
+    st.bar_chart(bucket_series.value_counts().reindex(ordered + remainder, fill_value=0))
 
 if "Price" in df.columns:
     st.subheader("Free vs Paid Share")
@@ -16,7 +21,10 @@ if "Price" in df.columns:
 
 if "price_bucket" in df.columns and "total_reviews" in df.columns:
     st.subheader("Median Total Reviews by Price Bucket")
-    median_reviews = df.groupby("price_bucket", dropna=True)["total_reviews"].median().sort_index()
+    median_reviews = df.groupby("price_bucket", dropna=True)["total_reviews"].median()
+    order = [x for x in PRICE_BUCKET_ORDER if x in median_reviews.index]
+    remainder = [x for x in median_reviews.index if x not in order]
+    median_reviews = median_reviews.reindex(order + sorted(remainder))
     st.bar_chart(median_reviews)
 
 st.subheader("Price and Monetization Table")

@@ -2,6 +2,8 @@ import streamlit as st
 
 from app.utils import get_available_columns, require_processed_data
 
+REVIEW_SIGNAL_ORDER = ["no_signal", "very_low", "low", "medium", "high"]
+
 st.title("Attention Distribution")
 df = require_processed_data()
 
@@ -20,7 +22,10 @@ else:
 
 if "review_signal" in df.columns:
     st.subheader("Review Signal Distribution")
-    review_signal_counts = df["review_signal"].fillna("Unknown").value_counts()
+    signal_series = df["review_signal"].fillna("Unknown").astype(str)
+    ordered = [x for x in REVIEW_SIGNAL_ORDER if x in signal_series.unique()]
+    remainder = sorted([x for x in signal_series.unique() if x not in ordered])
+    review_signal_counts = signal_series.value_counts().reindex(ordered + remainder, fill_value=0)
     st.bar_chart(review_signal_counts)
 
 if "Name" in df.columns and "total_reviews" in df.columns:
