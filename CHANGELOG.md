@@ -2,6 +2,15 @@
 
 All notable changes to this project are documented in this file.
 
+## [0.2.0-unreleased] - 2026-05-24
+### Added
+- V0.2 analytical feature foundation kickoff with robust feature-engineering fields for market insights, including has_reviews.
+- V0.2 roadmap document (`docs/v0.2_roadmap.md`).
+
+### Improved
+- Validation checks expanded for V0.2 analytical columns and value constraints.
+- Test coverage expanded for mixed-type, missing-value, and edge-case feature engineering inputs.
+
 ## [0.1.0] - 2026-05-23
 ### Added
 - Reproducible Steam data cleaning and feature-engineering pipeline.
