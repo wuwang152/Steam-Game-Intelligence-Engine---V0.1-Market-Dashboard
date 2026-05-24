@@ -2,19 +2,18 @@
 
 All notable changes to this project are documented in this file.
 
-## [0.2.0-unreleased] - 2026-05-24
+## [0.2.0] - 2026-05-24
 ### Added
-- V0.2 analytical feature foundation kickoff with robust feature-engineering fields for market insights, including has_reviews.
-- V0.2 Step 2 Market Insights Streamlit page (`app/pages/7_Market_Insights.py`) with V0.2 feature-aware filtering, KPI cards, market charts, scatter analysis, and top-game tables.
+- V0.2 analytical feature engineering foundation with robust market-insights fields, including `has_reviews`.
+- V0.2 Market Insights Streamlit page (`app/pages/7_Market_Insights.py`) with V0.2 feature-aware filtering, KPI cards, market charts, scatter analysis, and top-game tables.
+- V0.2 reproducible Market Insights report generation script (`scripts/generate_market_report.py`) and report artifact output (`reports/steam_market_insights_v0.2.md`).
 - V0.2 roadmap document (`docs/v0.2_roadmap.md`).
-- V0.2 Step 4 reproducible Market Insights report generation script (`scripts/generate_market_report.py`) and report artifact output (`reports/steam_market_insights_v0.2.md`).
 
 ### Improved
-- V0.2 Step 3 lightweight Market Insights visualization polish with clearer sectioning, filter summary, KPI formatting, chart grouping tabs, and ranking/hidden-gem presentation updates.
-- V0.2 Step 5 dashboard consistency and readability patch: aligned user-facing terminology (Positive Rate, Total Reviews, Price Bucket, Review Signal, Review Sentiment), added stable category ordering, replaced log-scale owners chart with readable ownership tiers, and added concise interpretation notes across key charts/pages.
+- Dashboard readability and terminology consistency: clearer sectioning, filter summary, KPI formatting, stable category ordering, readable ownership-tier view, and concise interpretation notes across key pages.
 - Validation checks expanded for V0.2 analytical columns and value constraints.
-- Test coverage expanded for mixed-type, missing-value, and edge-case feature engineering inputs.
-- V0.2 Step 7 documentation cleanup: refreshed README positioning/version wording, added V0.2 feature summary and report linkage, expanded cross-platform command examples (Bash + PowerShell), clarified interpretation notes, and updated V0.3 roadmap framing.
+- Test coverage expanded for mixed-type, missing-value, and edge-case feature-engineering inputs.
+- README and project presentation cleanup with V0.2 positioning, report linkage, cross-platform command examples, and clarified interpretation notes.
 
 ## [0.1.0] - 2026-05-23
 ### Added
