@@ -30,6 +30,10 @@ TABLE_COLUMNS = [
     "Genres",
     "Tags",
 ]
+PRICE_BUCKET_ORDER = ["free", "budget", "mid", "premium", "luxury"]
+REVIEW_SIGNAL_ORDER = ["no_signal", "very_low", "low", "medium", "high"]
+REVIEW_SENTIMENT_ORDER = ["no_reviews", "weak", "mixed", "strong"]
+PLATFORM_COUNT_ORDER = [0, 1, 2, 3]
 
 
 def numeric_series(df: pd.DataFrame, column: str) -> pd.Series:
@@ -83,10 +87,7 @@ def prepare_display_table(df: pd.DataFrame, sort_cols: list[str], ascending: lis
 
 
 st.title("Market Insights")
-st.info(
-    "V0.2 analytical features are used on this page. `owners_mid` is an estimated owner-range midpoint (not exact sales), "
-    "`positive_rate` is most meaningful for games with reviews, and hidden gems are heuristic candidates rather than machine-learning predictions."
-)
+st.info("V0.2 analytical features are used on this page.")
 
 
 df = require_processed_data()
@@ -115,6 +116,7 @@ if filtered_df["release_year"].notna().any():
         filtered_df = filtered_df[numeric_series(filtered_df, "release_year").between(*selected_years)]
 
 bucket_options = sorted(filtered_df["price_bucket"].dropna().astype(str).unique().tolist())
+bucket_options = [b for b in PRICE_BUCKET_ORDER if b in bucket_options] + [b for b in bucket_options if b not in PRICE_BUCKET_ORDER]
 if bucket_options:
     selected_buckets = st.sidebar.multiselect("Price bucket", options=bucket_options, default=bucket_options)
     if selected_buckets:
@@ -158,8 +160,8 @@ k1, k2, k3, k4, k5, k6 = st.columns(6)
 with_reviews = filtered_df[safe_column(filtered_df, "has_reviews", False).fillna(False)]
 k1.metric("Total games", format_int(len(filtered_df)))
 k2.metric("Games with reviews", format_int(safe_column(filtered_df, "has_reviews", False).fillna(False).sum()))
-k3.metric("Median owners_mid", format_int(numeric_series(filtered_df, "owners_mid").median()))
-k4.metric("Median positive_rate", format_percent_safe(numeric_series(with_reviews, "positive_rate").median()))
+k3.metric("Median owners_mid (estimated)", format_int(numeric_series(filtered_df, "owners_mid").median()))
+k4.metric("Median Positive Rate", format_percent_safe(numeric_series(with_reviews, "positive_rate").median()))
 k5.metric("Free game share", format_percent_safe(safe_share(safe_column(filtered_df, "is_free", False))))
 k6.metric("Discounted game share", format_percent_safe(safe_share(safe_column(filtered_df, "has_discount", False))))
 st.caption("KPIs are computed from the currently filtered sample and use robust missing-value handling.")
@@ -170,36 +172,49 @@ with market_tab:
     st.subheader("Market Structure")
 
     st.caption("Games by release_year: yearly game count after filters.")
+    st.caption("Recent and future release years may be incomplete.")
     year_counts = numeric_series(filtered_df, "release_year").dropna().astype(int).value_counts().sort_index()
     if not year_counts.empty:
         st.bar_chart(year_counts)
     else:
         st.info("No release year data available for current filters.")
 
-    st.caption("Price bucket distribution: game count by pricing segment.")
-    bucket_counts = safe_column(filtered_df, "price_bucket", "Unknown").fillna("Unknown").astype(str).value_counts()
+    st.caption("Price Bucket distribution: game count by pricing segment.")
+    bucket_series = safe_column(filtered_df, "price_bucket", "Unknown").fillna("Unknown").astype(str)
+    bucket_order = [x for x in PRICE_BUCKET_ORDER if x in bucket_series.unique()]
+    bucket_remainder = sorted([x for x in bucket_series.unique() if x not in bucket_order])
+    bucket_counts = bucket_series.value_counts().reindex(bucket_order + bucket_remainder, fill_value=0)
     if not bucket_counts.empty:
         st.bar_chart(bucket_counts)
     else:
         st.info("No price bucket data available for current filters.")
 
-    st.caption("Log-scaled owners_mid distribution: spread of estimated ownership across magnitudes.")
+    st.caption("Estimated Ownership Tier Distribution")
     owners_dist = numeric_series(filtered_df, "owners_mid").dropna()
     if not owners_dist.empty:
-        owners_hist = pd.Series(np.log10(owners_dist + 1), name="log10_owners_mid")
-        st.bar_chart(owners_hist.value_counts(bins=30).sort_index())
+        bins = [-0.1, 0, 10_000, 50_000, 100_000, 500_000, 1_000_000, 10_000_000, np.inf]
+        labels = ["0", "1–10k", "10k–50k", "50k–100k", "100k–500k", "500k–1M", "1M–10M", "10M+"]
+        owners_tier = pd.cut(owners_dist, bins=bins, labels=labels, include_lowest=True, right=True)
+        st.bar_chart(owners_tier.value_counts(sort=False))
+        st.caption("owners_mid is an estimated midpoint of owner ranges, not exact sales.")
     else:
         st.info("No valid owners_mid values available for distribution plotting.")
 
-    st.caption("review_signal distribution: quality/volume signal buckets from V0.2 features.")
-    signal_counts = safe_column(filtered_df, "review_signal", "Unknown").fillna("Unknown").astype(str).value_counts()
+    st.caption("Review Signal distribution: quality/volume signal buckets from V0.2 features.")
+    signal_series = safe_column(filtered_df, "review_signal", "Unknown").fillna("Unknown").astype(str)
+    signal_order = [x for x in REVIEW_SIGNAL_ORDER if x in signal_series.unique()]
+    signal_remainder = sorted([x for x in signal_series.unique() if x not in signal_order])
+    signal_counts = signal_series.value_counts().reindex(signal_order + signal_remainder, fill_value=0)
     if not signal_counts.empty:
         st.bar_chart(signal_counts)
     else:
         st.info("No review_signal values available for current filters.")
 
-    st.caption("review_sentiment distribution: sentiment group counts for filtered games.")
-    sentiment_counts = safe_column(filtered_df, "review_sentiment", "Unknown").fillna("Unknown").astype(str).value_counts()
+    st.caption("Review Sentiment distribution: sentiment group counts for filtered games.")
+    sentiment_series = safe_column(filtered_df, "review_sentiment", "Unknown").fillna("Unknown").astype(str)
+    sentiment_order = [x for x in REVIEW_SENTIMENT_ORDER if x in sentiment_series.unique()]
+    sentiment_remainder = sorted([x for x in sentiment_series.unique() if x not in sentiment_order])
+    sentiment_counts = sentiment_series.value_counts().reindex(sentiment_order + sentiment_remainder, fill_value=0)
     if not sentiment_counts.empty:
         st.bar_chart(sentiment_counts)
     else:
@@ -208,7 +223,8 @@ with market_tab:
 with review_tab:
     st.subheader("Review and Popularity")
 
-    st.caption("owners_mid vs positive_rate for reviewed games: ownership scale and sentiment relationship.")
+    st.caption("owners_mid vs Positive Rate for reviewed games: ownership scale and sentiment relationship.")
+    st.caption("Positive Rate is most meaningful for games with reviews.")
     scatter_a = filtered_df[
         safe_column(filtered_df, "has_reviews", False).fillna(False)
         & numeric_series(filtered_df, "owners_mid").notna()
@@ -237,14 +253,14 @@ with ranking_tab:
     st.caption("Top-game tables are ranked on numeric conversions with display-only formatting.")
 
     top_owners_df = prepare_display_table(filtered_df, ["owners_mid", "total_reviews"], [False, False], limit=20)
-    st.caption("Top games by owners_mid")
+    st.caption("Top games by Estimated Owners Midpoint")
     if top_owners_df.empty:
         st.info("No rows available for owners_mid ranking under current filters.")
     else:
         st.dataframe(top_owners_df, use_container_width=True)
 
     top_reviews_df = prepare_display_table(filtered_df, ["total_reviews", "owners_mid"], [False, False], limit=20)
-    st.caption("Top games by total_reviews")
+    st.caption("Top games by Total Reviews")
     if top_reviews_df.empty:
         st.info("No rows available for total_reviews ranking under current filters.")
     else:
@@ -253,7 +269,7 @@ with ranking_tab:
     min_reviews_for_rating = max(20, int(numeric_series(filtered_df, "total_reviews").median()) if numeric_series(filtered_df, "total_reviews").notna().any() else 20)
     top_rated = filtered_df[numeric_series(filtered_df, "total_reviews").fillna(0) >= min_reviews_for_rating].copy()
     top_rated_df = prepare_display_table(top_rated, ["positive_rate", "total_reviews"], [False, False], limit=20)
-    st.caption(f"Top rated games by positive_rate (minimum {min_reviews_for_rating:,} reviews)")
+    st.caption(f"Top rated games by Positive Rate (minimum {min_reviews_for_rating:,} reviews)")
     if top_rated_df.empty:
         st.info("No games satisfy the minimum review threshold for rated ranking.")
     else:
@@ -261,8 +277,7 @@ with ranking_tab:
 
     st.subheader("Hidden Gems")
     st.caption(
-        "Hidden gems are heuristic candidates with strong review performance and relatively lower estimated ownership. "
-        "They are not model predictions."
+        "Hidden Gems: Heuristic candidates, not model predictions."
     )
     hidden_gems = filtered_df[
         (numeric_series(filtered_df, "positive_rate") >= 0.85)

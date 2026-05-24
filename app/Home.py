@@ -143,9 +143,9 @@ def _show_kpis(df: pd.DataFrame) -> None:
         k2.metric("Median price", "N/A")
 
     if owners_col and df[owners_col].notna().any():
-        k3.metric("Median owners", f"{int(_to_numeric(df[owners_col]).median()):,}")
+        k3.metric("Estimated Owners Midpoint (Median)", f"{int(_to_numeric(df[owners_col]).median()):,}")
     else:
-        k3.metric("Median owners", "N/A")
+        k3.metric("Estimated Owners Midpoint (Median)", "N/A")
 
     if peak_ccu_col and df[peak_ccu_col].notna().any():
         k4.metric("Average peak CCU", f"{_to_numeric(df[peak_ccu_col]).mean():,.0f}")
@@ -232,8 +232,10 @@ def _show_table(df: pd.DataFrame) -> None:
 
 
 def main() -> None:
-    st.title("Steam Game Intelligence Engine — V0.1")
-    st.caption("Interactive market exploration dashboard for cleaned Steam games data.")
+    st.title("Steam Game Intelligence Engine — V0.2")
+    st.caption(
+        "V0.2 includes analytical feature engineering, Market Insights, and reproducible report generation."
+    )
     st.write(
         "Filter games by release timing, price, platform, genre, and review momentum to identify market patterns quickly."
     )
