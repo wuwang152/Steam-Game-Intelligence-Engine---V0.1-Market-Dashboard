@@ -35,7 +35,11 @@ if "price_bucket" in filtered_df.columns:
 
 summary_metrics = load_summary_metrics_row()
 if summary_metrics is not None:
-    st.caption("核心指标优先读取后端聚合表 summary_metrics.csv，确保前端展示与后端分析口径一致。")
+    st.markdown("#### 全量样本核心指标")
+    st.caption(
+        "以下核心指标来自后端聚合表 summary_metrics.csv，反映全量样本口径，不随左侧筛选器变化；"
+        "下方图表和数据预览仍会随筛选条件更新。"
+    )
 
     def _fmt_int(metric_name: str) -> str:
         value = pd.to_numeric(summary_metrics.get(metric_name), errors="coerce")
