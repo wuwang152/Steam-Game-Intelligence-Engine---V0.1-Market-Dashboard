@@ -85,6 +85,11 @@ def distribution_table(series: pd.Series, category_col: str) -> pd.DataFrame:
     return counts
 
 
+def _reviewed_median_positive_rate(group: pd.DataFrame) -> float:
+    reviewed = group[group["total_reviews"] > 0]["positive_rate"]
+    return reviewed.median() if not reviewed.empty else np.nan
+
+
 def grouped_metric_table(df: pd.DataFrame, group_col: str) -> pd.DataFrame:
     if group_col not in df.columns:
         return pd.DataFrame(columns=[group_col, "count", "share", "median_owners_mid", "median_total_reviews", "median_positive_rate_reviewed"])
@@ -97,8 +102,8 @@ def grouped_metric_table(df: pd.DataFrame, group_col: str) -> pd.DataFrame:
         count=(group_col, "size"),
         median_owners_mid=("owners_mid", "median"),
         median_total_reviews=("total_reviews", "median"),
-        median_positive_rate_reviewed=("positive_rate", "median"),
     ).reset_index()
+    out["median_positive_rate_reviewed"] = gdf.groupby(group_col, dropna=False).apply(_reviewed_median_positive_rate).values
     out["share"] = out["count"] / out["count"].sum()
     return out[[group_col, "count", "share", "median_owners_mid", "median_total_reviews", "median_positive_rate_reviewed"]]
 
@@ -118,14 +123,17 @@ def _list_table(df: pd.DataFrame, source_col: str, out_col: str, top_n: int, inc
     if not rows:
         return _empty(f"{out_col}_distribution")
     out = pd.DataFrame(rows)
-    tbl = out.groupby(out_col).agg(
+    grouped = out.groupby(out_col)
+    tbl = grouped.agg(
         count=(out_col, "size"),
         median_owners_mid=("owners_mid", "median"),
         median_total_reviews=("total_reviews", "median"),
-        median_positive_rate_reviewed=("positive_rate", "median"),
         simplified_chinese_support_share=("supports_simplified_chinese", "mean"),
-    ).reset_index().sort_values("count", ascending=False).head(top_n)
-    tbl["share"] = tbl["count"] / tbl["count"].sum()
+    ).reset_index()
+    tbl["median_positive_rate_reviewed"] = grouped.apply(_reviewed_median_positive_rate).values
+    total_valid_occurrences = tbl["count"].sum()
+    tbl["share"] = tbl["count"] / total_valid_occurrences if total_valid_occurrences else np.nan
+    tbl = tbl.sort_values("count", ascending=False).head(top_n)
     base_cols = [out_col, "count", "share", "median_owners_mid", "median_total_reviews", "median_positive_rate_reviewed"]
     return tbl[base_cols + (["simplified_chinese_support_share"] if include_lang_share else [])]
 
@@ -166,7 +174,9 @@ def build_dashboard_tables(df: pd.DataFrame, top_n: int = 30, min_reviews: int =
     bins = [-np.inf, 0, 1e4, 5e4, 1e5, 5e5, 1e6, 1e7, np.inf]
     labels = ["0", "1–10k", "10k–50k", "50k–100k", "100k–500k", "500k–1M", "1M–10M", "10M+"]
     data["owners_tier"] = pd.cut(data["owners_mid"], bins=bins, labels=labels, include_lowest=True)
-    ot = data.groupby("owners_tier", observed=False).agg(count=("owners_tier", "size"), median_positive_rate_reviewed=("positive_rate", "median"), median_total_reviews=("total_reviews", "median")).reset_index()
+    ot_grouped = data.groupby("owners_tier", observed=False)
+    ot = ot_grouped.agg(count=("owners_tier", "size"), median_total_reviews=("total_reviews", "median")).reset_index()
+    ot["median_positive_rate_reviewed"] = ot_grouped.apply(_reviewed_median_positive_rate).values
     ot["share"] = ot["count"] / ot["count"].sum() if ot["count"].sum() else np.nan
     tables["owners_tier_distribution"] = ot[TABLE_COLUMNS["owners_tier_distribution"]]
 
@@ -177,7 +187,9 @@ def build_dashboard_tables(df: pd.DataFrame, top_n: int = 30, min_reviews: int =
     rb_bins = [-0.1, 0, 19, 99, 499, 999, 4999, 9999, 49999, np.inf]
     rb_labels = ["0", "1–19", "20–99", "100–499", "500–999", "1k–4,999", "5k–9,999", "10k–49,999", "50k+"]
     data["review_bucket"] = pd.cut(data["total_reviews"], bins=rb_bins, labels=rb_labels)
-    rb = data.groupby("review_bucket", observed=False).agg(count=("review_bucket", "size"), median_positive_rate_reviewed=("positive_rate", "median"), median_owners_mid=("owners_mid", "median")).reset_index()
+    rb_grouped = data.groupby("review_bucket", observed=False)
+    rb = rb_grouped.agg(count=("review_bucket", "size"), median_owners_mid=("owners_mid", "median")).reset_index()
+    rb["median_positive_rate_reviewed"] = rb_grouped.apply(_reviewed_median_positive_rate).values
     rb["share"] = rb["count"] / rb["count"].sum() if rb["count"].sum() else np.nan
     tables["review_bucket_positive_rate"] = rb[TABLE_COLUMNS["review_bucket_positive_rate"]]
 
@@ -200,7 +212,11 @@ def build_dashboard_tables(df: pd.DataFrame, top_n: int = 30, min_reviews: int =
                 if g in lg:
                     rows.append({"genre":g, "supports_simplified_chinese":r["supports_simplified_chinese"], "supports_english":r["supports_english"], "supports_japanese":r["supports_japanese"], "supports_korean":r["supports_korean"], "positive_rate":r["positive_rate"], "total_reviews":r["total_reviews"]})
         if rows:
-            ldf=pd.DataFrame(rows).groupby("genre").agg(count=("genre","size"), simplified_chinese_support_share=("supports_simplified_chinese","mean"), english_support_share=("supports_english","mean"), japanese_support_share=("supports_japanese","mean"), korean_support_share=("supports_korean","mean"), median_positive_rate_reviewed=("positive_rate","median"), median_total_reviews=("total_reviews","median")).reset_index().sort_values("count", ascending=False).head(top_n)
+            ldf_base = pd.DataFrame(rows)
+            ldf_grouped = ldf_base.groupby("genre")
+            ldf = ldf_grouped.agg(count=("genre","size"), simplified_chinese_support_share=("supports_simplified_chinese","mean"), english_support_share=("supports_english","mean"), japanese_support_share=("supports_japanese","mean"), korean_support_share=("supports_korean","mean"), median_total_reviews=("total_reviews","median")).reset_index()
+            ldf["median_positive_rate_reviewed"] = ldf_grouped.apply(_reviewed_median_positive_rate).values
+            ldf = ldf.sort_values("count", ascending=False).head(top_n)
             tables["localization_by_genre"]=ldf[TABLE_COLUMNS["localization_by_genre"]]
         else: tables["localization_by_genre"]=_empty("localization_by_genre")
     else:

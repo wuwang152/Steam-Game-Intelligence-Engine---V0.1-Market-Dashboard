@@ -58,3 +58,35 @@ def test_write_dashboard_tables(tmp_path):
     assert (out / "summary_metrics.csv").exists()
     assert (out / "top_games_by_reviews.csv").exists()
     assert not (tmp_path / "summary_metrics.csv").exists()
+
+
+def test_top_n_share_uses_full_valid_denominator():
+    df = pd.DataFrame([
+        {"Name": "g1", "owners_mid": 1, "total_reviews": 1, "positive_rate": 1.0, "supports_simplified_chinese": False, "Tags": "A"},
+        {"Name": "g2", "owners_mid": 1, "total_reviews": 1, "positive_rate": 1.0, "supports_simplified_chinese": False, "Tags": "A"},
+        {"Name": "g3", "owners_mid": 1, "total_reviews": 1, "positive_rate": 1.0, "supports_simplified_chinese": False, "Tags": "A"},
+        {"Name": "g4", "owners_mid": 1, "total_reviews": 1, "positive_rate": 1.0, "supports_simplified_chinese": False, "Tags": "B"},
+        {"Name": "g5", "owners_mid": 1, "total_reviews": 1, "positive_rate": 1.0, "supports_simplified_chinese": False, "Tags": "B"},
+        {"Name": "g6", "owners_mid": 1, "total_reviews": 1, "positive_rate": 1.0, "supports_simplified_chinese": False, "Tags": "C"},
+    ])
+    tbl = build_dashboard_tables(df, top_n=2)["tag_distribution"].set_index("tag")
+    assert tbl.loc["A", "share"] == 3 / 6
+    assert tbl.loc["B", "share"] == 2 / 6
+
+
+def test_median_positive_rate_reviewed_excludes_no_review_rows():
+    df = pd.DataFrame([
+        {"review_signal": "low", "owners_mid": 1, "total_reviews": 0, "positive_rate": 0.0},
+        {"review_signal": "low", "owners_mid": 1, "total_reviews": 10, "positive_rate": 0.9},
+    ])
+    tbl = build_dashboard_tables(df)["review_signal_distribution"].set_index("review_signal")
+    assert tbl.loc["low", "median_positive_rate_reviewed"] == 0.9
+
+
+def test_median_positive_rate_reviewed_nan_when_no_reviewed_rows():
+    df = pd.DataFrame([
+        {"review_signal": "low", "owners_mid": 1, "total_reviews": 0, "positive_rate": 0.0},
+        {"review_signal": "low", "owners_mid": 1, "total_reviews": 0, "positive_rate": 0.0},
+    ])
+    tbl = build_dashboard_tables(df)["review_signal_distribution"].set_index("review_signal")
+    assert pd.isna(tbl.loc["low", "median_positive_rate_reviewed"])
