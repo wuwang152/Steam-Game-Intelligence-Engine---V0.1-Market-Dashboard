@@ -160,3 +160,44 @@ def test_score_activity_language_and_metadata_flags():
     assert out["has_header_image"].tolist() == [True, False, False, True]
     assert out["has_about_text"].tolist() == [True, False, False, True]
     assert out["has_screenshots"].tolist() == [True, False, False, True]
+
+
+def test_placeholder_strings_are_treated_as_missing():
+    df = pd.DataFrame(
+        {
+            "Release date": ["2021-01-01"],
+            "Estimated owners": ["0 - 0"],
+            "Positive": [1],
+            "Negative": [1],
+            "Price": [1.0],
+            "Genres": ["None"],
+            "Tags": ["None"],
+            "Categories": ["N/A"],
+            "Developers": ["nan"],
+            "Publishers": ["null"],
+            "Screenshots": ["None"],
+            "About the game": ["None"],
+            "Supported languages": ["None"],
+            "Full audio languages": ["None"],
+        }
+    )
+
+    out = add_engineered_features(df)
+
+    assert out.loc[0, "has_genres"] == False
+    assert out.loc[0, "genre_count"] == 0
+    assert out.loc[0, "has_tags"] == False
+    assert out.loc[0, "tag_count"] == 0
+    assert out.loc[0, "has_categories"] == False
+    assert out.loc[0, "has_developer"] == False
+    assert out.loc[0, "has_publisher"] == False
+    assert out.loc[0, "screenshot_count"] == 0
+    assert out.loc[0, "has_screenshots"] == False
+    assert out.loc[0, "has_about_text"] == False
+    assert out.loc[0, "supported_language_count"] == 0
+    assert out.loc[0, "supports_simplified_chinese"] == False
+    assert out.loc[0, "supports_english"] == False
+    assert out.loc[0, "supports_japanese"] == False
+    assert out.loc[0, "supports_korean"] == False
+    assert out.loc[0, "full_audio_language_count"] == 0
+    assert out.loc[0, "has_chinese_audio"] == False

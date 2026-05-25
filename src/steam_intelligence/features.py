@@ -51,13 +51,20 @@ def _split_owner_range(value: object) -> tuple[float, float]:
     return float(low), float(high)
 
 
-def _split_list_items(value: object) -> list[str]:
+MISSING_TEXT_TOKENS = {"", "none", "nan", "null", "n/a", "na", "[]", "-"}
+
+
+def _is_missing_text(value: object) -> bool:
     if pd.isna(value):
+        return True
+    return str(value).strip().lower() in MISSING_TEXT_TOKENS
+
+
+def _split_list_items(value: object) -> list[str]:
+    if _is_missing_text(value):
         return []
     text = str(value).strip()
-    if not text:
-        return []
-    return [item.strip() for item in re.split(r"[;,]", text) if item.strip()]
+    return [item.strip() for item in re.split(r"[;,]", text) if not _is_missing_text(item)]
 
 
 def _count_pipe_items(value: str) -> int:
@@ -66,7 +73,7 @@ def _count_pipe_items(value: str) -> int:
 
 
 def _is_nonempty_text(value: object) -> bool:
-    return not pd.isna(value) and str(value).strip() != ""
+    return not _is_missing_text(value)
 
 
 def _contains_language(value: object, patterns: tuple[str, ...], *, case_insensitive: bool = True) -> bool:
