@@ -182,7 +182,7 @@ def _show_kpis(df: pd.DataFrame) -> None:
         s12.metric("有开发商数据游戏数", _fmt_int("games_with_developer"))
         return
 
-    st.warning("未检测到后端总览指标表。请先运行 generate_dashboard_tables.py 生成后端分析表。")
+    st.warning("未检测到后端聚合表（总览指标）。请先运行 generate_dashboard_tables.py 生成后端聚合表。")
     st.code(SUMMARY_METRICS_GENERATE_CMD, language="bash")
 
     k1, k2, k3 = st.columns(3)
@@ -323,3 +323,6 @@ def main() -> None:
 
 
 main()
+
+
+st.caption("后端聚合表反映全量样本口径；若页面存在筛选器，请注意筛选结果与全量指标的区别。")

@@ -91,7 +91,7 @@ def _load_table(name: str) -> pd.DataFrame | None:
 
 
 def _show_missing_table_warning(table_name: str) -> None:
-    st.warning("未检测到对应的后端榜单表。请先运行 generate_dashboard_tables.py 生成后端分析表。")
+    st.warning("未检测到对应的后端榜单表。请先运行 generate_dashboard_tables.py 生成后端聚合表。")
     st.code(GEN_CMD, language="bash")
     st.caption(f"缺失表：{table_name}.csv")
 
@@ -297,7 +297,7 @@ if selected_section == "市场结构":
         labels = ["0", "1–10k", "10k–50k", "50k–100k", "100k–500k", "500k–1M", "1M–10M", "10M+"]
         owners_tier = pd.cut(owners_dist, bins=bins, labels=labels, include_lowest=True, right=True)
         st.bar_chart(owners_tier.value_counts(sort=False))
-        st.caption("owners_mid 是拥有者区间中点估计值，不代表精确销量。")
+        st.caption("owners_mid 为 Steam 拥有者区间的中点估计，不代表精确销量。")
     else:
         st.info("无可用于分布绘图的有效 owners_mid 数据。")
 
@@ -326,7 +326,7 @@ if selected_section == "评论与热度":
     st.caption("为提升渲染速度，散点图默认展示抽样结果。")
 
     st.caption("有评论游戏的 owners_mid 与好评率关系：拥有者规模与口碑关系。")
-    st.caption("好评率对有评论的游戏更有参考意义。")
+    st.caption("好评率仅在有评论样本中更具解释意义。")
     scatter_a = filtered_df[
         safe_column(filtered_df, "has_reviews", False).fillna(False)
         & numeric_series(filtered_df, "owners_mid").notna()
@@ -359,7 +359,7 @@ if selected_section == "评论与热度":
 
 if selected_section == "排行榜":
     st.subheader("市场机会与榜单")
-    st.info("本页榜单优先读取后端生成的透明启发式结果，用于市场观察和机会识别，不代表机器学习预测、因果结论或个性化推荐。")
+    st.info("机会识别榜单为透明启发式规则结果，不代表机器学习预测、因果结论或个性化推荐。")
 
     ranking_section = st.radio("选择榜单板块", ["热门榜单", "高口碑榜单", "机会识别", "本地化机会", "风险观察"], horizontal=True)
 
@@ -367,12 +367,12 @@ if selected_section == "排行榜":
         owners_ok = _show_ranking_section(
             "按估计拥有者数量排序的热门游戏",
             "top_games_by_owners",
-            "该榜单基于后端排序表生成，仅用于描述市场关注度和规模，不代表精确销量。owners_mid 为拥有者区间中点估计。",
+            "该榜单基于后端排序表生成，仅用于描述市场关注度和规模，不代表精确销量。owners_mid 为 Steam 拥有者区间的中点估计，不代表精确销量。",
         )
         reviews_ok = _show_ranking_section(
             "按评论数排序的热门游戏",
             "top_games_by_reviews",
-            "该榜单基于后端排序表生成，仅用于描述市场关注度和规模，不代表精确销量。owners_mid 为拥有者区间中点估计。",
+            "该榜单基于后端排序表生成，仅用于描述市场关注度和规模，不代表精确销量。owners_mid 为 Steam 拥有者区间的中点估计，不代表精确销量。",
         )
 
         if not owners_ok:

@@ -2,7 +2,17 @@ import pandas as pd
 import streamlit as st
 
 from app.dashboard_table_loader import load_dashboard_table
-from app.utils import REVIEW_SENTIMENT_LABELS, format_percent, get_available_columns, map_display_series, rename_display_columns, require_processed_data
+from app.utils import (
+    REVIEW_SENTIMENT_LABELS,
+    format_count_columns,
+    format_percent,
+    format_percent_columns,
+    format_ranking_table_for_display,
+    get_available_columns,
+    map_display_series,
+    rename_display_columns,
+    require_processed_data,
+)
 
 REVIEW_SENTIMENT_ORDER = ["no_reviews", "weak", "mixed", "strong"]
 GEN_CMD = (
@@ -11,28 +21,8 @@ GEN_CMD = (
 )
 
 
-def _format_percent_columns(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    display_df = df.copy()
-    for col in columns:
-        if col in display_df.columns:
-            display_df[col] = pd.to_numeric(display_df[col], errors="coerce").map(
-                lambda x: f"{x:.1%}" if pd.notna(x) else "-"
-            )
-    return display_df
-
-
-def _format_count_columns(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    display_df = df.copy()
-    for col in columns:
-        if col in display_df.columns:
-            display_df[col] = pd.to_numeric(display_df[col], errors="coerce").map(
-                lambda x: f"{x:,.0f}" if pd.notna(x) else "-"
-            )
-    return display_df
-
-
 def _backend_table_warning() -> None:
-    st.warning("未检测到对应的后端聚合表。请先运行 generate_dashboard_tables.py 生成后端分析表。")
+    st.warning("未检测到对应的后端聚合表。请先运行 generate_dashboard_tables.py 生成后端聚合表。")
     st.code(GEN_CMD)
 
 
@@ -54,7 +44,7 @@ if sentiment_df is not None and not sentiment_df.empty and {"review_sentiment", 
     preview["review_sentiment"] = map_display_series(preview["review_sentiment"], REVIEW_SENTIMENT_LABELS)
     preview = _format_count_columns(preview, ["count", "median_owners_mid", "median_total_reviews"])
     preview = _format_percent_columns(preview, ["share"])
-    st.dataframe(rename_display_columns(preview), use_container_width=True)
+    st.dataframe(format_ranking_table_for_display(preview), use_container_width=True)
     st.caption("口碑情绪分布优先读取后端聚合表 review_sentiment_distribution.csv，反映全量样本的口碑结构。")
 else:
     _backend_table_warning()
@@ -76,7 +66,7 @@ if bucket_df is not None and not bucket_df.empty and {"review_bucket", "median_p
     preview = bucket_df[[c for c in preview_cols if c in bucket_df.columns]].copy()
     preview = _format_count_columns(preview, ["count", "median_owners_mid"])
     preview = _format_percent_columns(preview, ["share", "median_positive_rate_reviewed"])
-    st.dataframe(preview, use_container_width=True)
+    st.dataframe(format_ranking_table_for_display(preview), use_container_width=True)
     st.caption("不同评论数量区间下的好评率中位数基于有评论游戏计算，可减少无评论样本对口碑判断的干扰。")
 else:
     _backend_table_warning()
