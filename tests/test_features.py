@@ -27,6 +27,11 @@ def test_feature_columns_exist():
         "positive_rate", "positive_ratio", "review_log", "has_reviews", "is_free", "has_discount",
         "review_signal", "review_sentiment", "price_bucket", "platform_count",
         "genre_count", "tag_count", "screenshot_count", "movie_count",
+        "has_valid_metascore", "has_valid_user_score", "has_peak_ccu", "has_recommendations",
+        "has_playtime_forever", "has_recent_playtime", "has_genres", "has_tags", "has_categories",
+        "has_developer", "has_publisher", "has_header_image", "has_screenshots", "has_about_text",
+        "supported_language_count", "full_audio_language_count", "supports_simplified_chinese",
+        "supports_english", "supports_japanese", "supports_korean", "has_chinese_audio",
     ]
     for col in expected:
         assert col in out.columns
@@ -57,7 +62,7 @@ def test_review_signal_bins():
 
 
 def test_review_sentiment_bins():
-    df = pd.DataFrame({"Release date":["2021-01-01","2021-01-01","2021-01-01"],"Estimated owners":["0 - 0","0 - 0","0 - 0"],"Positive":[3,5,8],"Negative":[7,5,2],"Price":[0,0,0],"Windows":[True,True,True],"Mac":[False,False,False],"Linux":[False,False,False],"Genres":["Action","Action","Action"],"Tags":["Indie","Indie","Indie"],"Screenshots":["","",""],"Movies":["","",""]})
+    df = pd.DataFrame({"Release date":["2021-01-01","2021-01-01","2021-01-01"],"Estimated owners":["0 - 0","0 - 0","0 - 0"],"Positive":[3,5,8],"Negative":[7,5,2],"Price":[0,0,0],"Windows":[True,True,True],"Mac":[False,False,False],"Linux":[False,False,False],"Genres":["Action","Action","Action"],"Tags":["Indie","Indie","Indie"],"Screenshots":["","",""] ,"Movies":["","",""]})
     out = add_engineered_features(df)
     assert list(out["review_sentiment"].astype(str)) == ["weak", "mixed", "strong"]
 
@@ -80,3 +85,78 @@ def test_messy_owner_ranges_invalid_dates_and_numeric_parsing():
     assert out.loc[0, "has_discount"] == True
     assert out.loc[0, "platform_count"] == 3
     assert str(out.loc[0, "price_bucket"]) == "budget"
+
+
+def test_missing_optional_columns_safe_defaults():
+    df = pd.DataFrame({"Release date": ["2020-01-01"], "Estimated owners": ["0 - 0"], "Positive": [0], "Negative": [0], "Price": [0]})
+    out = add_engineered_features(df)
+    false_flags = [
+        "has_valid_metascore", "has_valid_user_score", "has_peak_ccu", "has_recommendations",
+        "has_playtime_forever", "has_recent_playtime", "has_tags", "has_categories", "has_developer",
+        "has_publisher", "has_header_image", "has_about_text", "supports_simplified_chinese",
+        "supports_english", "supports_japanese", "supports_korean", "has_chinese_audio", "has_screenshots",
+    ]
+    for col in false_flags:
+        assert out.loc[0, col] == False
+    assert out.loc[0, "supported_language_count"] == 0
+    assert out.loc[0, "full_audio_language_count"] == 0
+
+
+def test_score_activity_language_and_metadata_flags():
+    df = pd.DataFrame(
+        {
+            "Release date": ["2021-01-01", "2021-01-01", "2021-01-01", "2021-01-01"],
+            "Estimated owners": ["0 - 0"] * 4,
+            "Positive": [1] * 4,
+            "Negative": [1] * 4,
+            "Price": [1.0] * 4,
+            "Metacritic score": [0, 85, 0, 85],
+            "User score": [0, 0, 78, 78],
+            "Peak CCU": [0, 100, 0, 0],
+            "Recommendations": [0, 0, 50, 0],
+            "Average playtime forever": [0, 10, 0, 0],
+            "Median playtime forever": [0, 0, 20, 0],
+            "Average playtime two weeks": [0, 0, 0, 30],
+            "Median playtime two weeks": [0, 0, 10, 0],
+            "Supported languages": [
+                "English, Simplified Chinese, Japanese",
+                "English; Chinese (Simplified); Korean",
+                "简体中文, 英语",
+                "",
+            ],
+            "Full audio languages": ["Simplified Chinese", "Chinese", "", None],
+            "Genres": ["Action", " ", None, "RPG"],
+            "Tags": ["Indie", "", None, "Action"],
+            "Categories": ["Single-player", "", None, "Co-op"],
+            "Developers": ["Valve", "", None, "N/A Dev"],
+            "Publishers": ["Valve", "", None, "N/A Pub"],
+            "Header image": ["http://img", "", None, "img2"],
+            "About the game": ["Some text", "", None, "More text"],
+            "Screenshots": ["a.jpg;b.jpg", "", None, "c.jpg"],
+        }
+    )
+    out = add_engineered_features(df)
+
+    assert out["has_valid_metascore"].tolist() == [False, True, False, True]
+    assert out["has_valid_user_score"].tolist() == [False, False, True, True]
+    assert out["has_peak_ccu"].tolist() == [False, True, False, False]
+    assert out["has_recommendations"].tolist() == [False, False, True, False]
+    assert out["has_playtime_forever"].tolist() == [False, True, True, False]
+    assert out["has_recent_playtime"].tolist() == [False, False, True, True]
+
+    assert out["supports_simplified_chinese"].tolist() == [True, True, True, False]
+    assert out["supports_english"].tolist() == [True, True, True, False]
+    assert out["supports_japanese"].tolist() == [True, False, False, False]
+    assert out["supports_korean"].tolist() == [False, True, False, False]
+    assert out["has_chinese_audio"].tolist() == [True, True, False, False]
+    assert (out["supported_language_count"] >= 0).all()
+    assert (out["full_audio_language_count"] >= 0).all()
+
+    assert out["has_genres"].tolist() == [True, False, False, True]
+    assert out["has_tags"].tolist() == [True, False, False, True]
+    assert out["has_categories"].tolist() == [True, False, False, True]
+    assert out["has_developer"].tolist() == [True, False, False, True]
+    assert out["has_publisher"].tolist() == [True, False, False, True]
+    assert out["has_header_image"].tolist() == [True, False, False, True]
+    assert out["has_about_text"].tolist() == [True, False, False, True]
+    assert out["has_screenshots"].tolist() == [True, False, False, True]

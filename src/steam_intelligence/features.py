@@ -51,15 +51,31 @@ def _split_owner_range(value: object) -> tuple[float, float]:
     return float(low), float(high)
 
 
+def _split_list_items(value: object) -> list[str]:
+    if pd.isna(value):
+        return []
+    text = str(value).strip()
+    if not text:
+        return []
+    return [item.strip() for item in re.split(r"[;,]", text) if item.strip()]
+
+
 def _count_pipe_items(value: str) -> int:
     """Count list-like values separated by ';' or ',' in a robust way."""
-    if pd.isna(value) or str(value).strip() == "":
-        return 0
+    return len(_split_list_items(value))
 
+
+def _is_nonempty_text(value: object) -> bool:
+    return not pd.isna(value) and str(value).strip() != ""
+
+
+def _contains_language(value: object, patterns: tuple[str, ...], *, case_insensitive: bool = True) -> bool:
+    if not _is_nonempty_text(value):
+        return False
     text = str(value)
-    sep = ";" if ";" in text else ","
-    items = [item.strip() for item in text.split(sep) if item.strip()]
-    return len(items)
+    haystack = text.lower() if case_insensitive else text
+    needles = [p.lower() for p in patterns] if case_insensitive else list(patterns)
+    return any(needle in haystack for needle in needles)
 
 
 def add_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
@@ -107,14 +123,55 @@ def add_engineered_features(df: pd.DataFrame) -> pd.DataFrame:
     )
 
     platforms = pd.DataFrame({
-        "Windows": out.get("Windows", False),
-        "Mac": out.get("Mac", False),
-        "Linux": out.get("Linux", False),
+        "Windows": out.get("Windows", pd.Series(False, index=out.index)),
+        "Mac": out.get("Mac", pd.Series(False, index=out.index)),
+        "Linux": out.get("Linux", pd.Series(False, index=out.index)),
     })
     out["platform_count"] = platforms.apply(lambda col: col.map(_to_bool)).sum(axis=1)
     out["genre_count"] = out.get("Genres", pd.Series(index=out.index, dtype=object)).apply(_count_pipe_items)
     out["tag_count"] = out.get("Tags", pd.Series(index=out.index, dtype=object)).apply(_count_pipe_items)
     out["screenshot_count"] = out.get("Screenshots", pd.Series(index=out.index, dtype=object)).apply(_count_pipe_items)
     out["movie_count"] = out.get("Movies", pd.Series(index=out.index, dtype=object)).apply(_count_pipe_items)
+
+    metascore = _to_numeric(out.get("Metacritic score", pd.Series(0, index=out.index)), default=0)
+    user_score = _to_numeric(out.get("User score", pd.Series(0, index=out.index)), default=0)
+    out["has_valid_metascore"] = metascore.gt(0)
+    out["has_valid_user_score"] = user_score.gt(0)
+
+    peak_ccu = _to_numeric(out.get("Peak CCU", pd.Series(0, index=out.index)), default=0)
+    recommendations = _to_numeric(out.get("Recommendations", pd.Series(0, index=out.index)), default=0)
+    avg_playtime_forever = _to_numeric(out.get("Average playtime forever", pd.Series(0, index=out.index)), default=0)
+    median_playtime_forever = _to_numeric(out.get("Median playtime forever", pd.Series(0, index=out.index)), default=0)
+    avg_playtime_2w = _to_numeric(out.get("Average playtime two weeks", pd.Series(0, index=out.index)), default=0)
+    median_playtime_2w = _to_numeric(out.get("Median playtime two weeks", pd.Series(0, index=out.index)), default=0)
+
+    out["has_peak_ccu"] = peak_ccu.gt(0)
+    out["has_recommendations"] = recommendations.gt(0)
+    out["has_playtime_forever"] = avg_playtime_forever.gt(0) | median_playtime_forever.gt(0)
+    out["has_recent_playtime"] = avg_playtime_2w.gt(0) | median_playtime_2w.gt(0)
+
+    out["has_genres"] = out.get("Genres", pd.Series(index=out.index, dtype=object)).map(_is_nonempty_text)
+    out["has_tags"] = out.get("Tags", pd.Series(index=out.index, dtype=object)).map(_is_nonempty_text)
+    out["has_categories"] = out.get("Categories", pd.Series(index=out.index, dtype=object)).map(_is_nonempty_text)
+    out["has_developer"] = out.get("Developers", pd.Series(index=out.index, dtype=object)).map(_is_nonempty_text)
+    out["has_publisher"] = out.get("Publishers", pd.Series(index=out.index, dtype=object)).map(_is_nonempty_text)
+    out["has_header_image"] = out.get("Header image", pd.Series(index=out.index, dtype=object)).map(_is_nonempty_text)
+    out["has_about_text"] = out.get("About the game", pd.Series(index=out.index, dtype=object)).map(_is_nonempty_text)
+    out["has_screenshots"] = out["screenshot_count"].gt(0)
+
+    supported_languages = out.get("Supported languages", pd.Series(index=out.index, dtype=object))
+    full_audio_languages = out.get("Full audio languages", pd.Series(index=out.index, dtype=object))
+
+    out["supported_language_count"] = supported_languages.map(_count_pipe_items)
+    out["full_audio_language_count"] = full_audio_languages.map(_count_pipe_items)
+
+    simplified_patterns = ("simplified chinese", "chinese (simplified)", "chinese - simplified", "simplified_chinese", "简体中文")
+    out["supports_simplified_chinese"] = supported_languages.map(lambda v: _contains_language(v, simplified_patterns))
+    out["supports_english"] = supported_languages.map(lambda v: _contains_language(v, ("english", "英语")))
+    out["supports_japanese"] = supported_languages.map(lambda v: _contains_language(v, ("japanese", "日语", "日本語")))
+    out["supports_korean"] = supported_languages.map(lambda v: _contains_language(v, ("korean", "韩语", "한국어")))
+    out["has_chinese_audio"] = full_audio_languages.map(
+        lambda v: _contains_language(v, simplified_patterns + ("chinese", "中文", "汉语", "漢語"))
+    )
 
     return out
