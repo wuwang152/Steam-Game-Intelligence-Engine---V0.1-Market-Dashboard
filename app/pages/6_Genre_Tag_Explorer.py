@@ -2,17 +2,21 @@ import streamlit as st
 
 from app.dashboard_table_loader import load_dashboard_table
 from app.utils import (
+    LANGUAGE_LABELS,
+    format_count_columns,
+    format_percent_columns,
+    format_ranking_table_for_display,
     get_available_columns,
     rename_display_columns,
     require_processed_data,
     top_split_values_cached,
 )
 GEN_CMD = "python scripts/generate_dashboard_tables.py --input data/processed/steam_games_cleaned.csv --output-dir data/processed/dashboard_tables --top-n 30 --min-reviews 20"
-LANG_CN = {"simplified_chinese": "简体中文", "english": "英文", "japanese": "日文", "korean": "韩文", "chinese_audio": "中文语音"}
+
 
 
 def _show_missing_table_warning(*table_names: str) -> None:
-    st.warning("未检测到对应的后端聚合表。请先运行 generate_dashboard_tables.py 生成后端分析表。")
+    st.warning("未检测到对应的后端聚合表。请先运行 generate_dashboard_tables.py 生成后端聚合表。")
     st.caption(f"缺失表：{', '.join([f'{name}.csv' for name in table_names])}")
     st.code(GEN_CMD, language="bash")
 
@@ -95,7 +99,7 @@ lang_dist = load_dashboard_table("language_support_summary")
 if lang_dist is not None and not lang_dist.empty and {"language", "count", "share"}.issubset(lang_dist.columns):
     st.caption("全量样本后端聚合结果")
     l_preview = lang_dist[["language", "count", "share"]].copy()
-    l_preview["language"] = l_preview["language"].map(lambda x: LANG_CN.get(str(x), str(x)))
+    l_preview["language"] = l_preview["language"].map(lambda x: LANGUAGE_LABELS.get(str(x), str(x)))
     l_preview["count"] = l_preview["count"].map(lambda x: f"{int(x):,}" if x == x else "—")
     l_preview["share"] = l_preview["share"].map(_pct)
     st.dataframe(l_preview, use_container_width=True)
@@ -120,6 +124,6 @@ else:
 st.subheader("筛选游戏表")
 table_cols = get_available_columns(filtered_df, ["Name", "Genres", "Tags", "genre_count", "tag_count", "positive_ratio"])
 if table_cols:
-    st.dataframe(rename_display_columns(filtered_df[table_cols].head(300)), use_container_width=True)
+    st.dataframe(format_ranking_table_for_display(filtered_df[table_cols].head(300).copy()), use_container_width=True)
 else:
     st.info("缺少可用于类型/标签展示的标准列。")

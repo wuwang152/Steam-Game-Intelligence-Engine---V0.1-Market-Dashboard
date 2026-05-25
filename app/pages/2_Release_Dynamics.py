@@ -7,7 +7,7 @@ GEN_CMD = "python scripts/generate_dashboard_tables.py --input data/processed/st
 
 
 def _show_missing_table_warning(table_name: str) -> None:
-    st.warning("未检测到对应的后端聚合表。请先运行 generate_dashboard_tables.py 生成后端分析表。")
+    st.warning("未检测到对应的后端聚合表。请先运行 generate_dashboard_tables.py 生成后端聚合表。")
     st.caption(f"缺失表：{table_name}.csv")
     st.code(GEN_CMD, language="bash")
 
@@ -55,5 +55,5 @@ if "positive_ratio" in df.columns:
     if not yearly_ratio.empty:
         st.subheader("各年份好评率中位数")
         st.caption("该曲线反映不同发行年份的玩家口碑中位变化。")
-        st.caption("好评率对有评论的游戏更有参考意义。")
+        st.caption("好评率仅在有评论样本中更具解释意义。")
         st.line_chart(yearly_ratio)
