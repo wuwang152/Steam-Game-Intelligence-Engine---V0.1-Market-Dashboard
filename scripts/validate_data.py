@@ -10,6 +10,36 @@ import pandas as pd
 from steam_intelligence.config import PROCESSED_DATA_PATH
 
 
+BOOLEAN_FEATURE_COLUMNS = [
+    "has_reviews",
+    "is_free",
+    "has_discount",
+    "has_valid_metascore",
+    "has_valid_user_score",
+    "has_peak_ccu",
+    "has_recommendations",
+    "has_playtime_forever",
+    "has_recent_playtime",
+    "has_genres",
+    "has_tags",
+    "has_categories",
+    "has_developer",
+    "has_publisher",
+    "has_header_image",
+    "has_screenshots",
+    "has_about_text",
+    "supports_simplified_chinese",
+    "supports_english",
+    "supports_japanese",
+    "supports_korean",
+    "has_chinese_audio",
+]
+
+COUNT_FEATURE_COLUMNS = [
+    "supported_language_count",
+    "full_audio_language_count",
+]
+
 REQUIRED_COLUMNS = [
     "AppID",
     "Name",
@@ -26,7 +56,19 @@ REQUIRED_COLUMNS = [
     "has_discount",
     "platform_count",
     "price_bucket",
+    *BOOLEAN_FEATURE_COLUMNS,
+    *COUNT_FEATURE_COLUMNS,
 ]
+
+
+def _is_bool_like(value: object) -> bool:
+    if pd.isna(value):
+        return False
+    if isinstance(value, bool):
+        return True
+    if isinstance(value, (int, float)):
+        return value in (0, 1)
+    return str(value).strip().lower() in {"true", "false", "1", "0", "yes", "no", "y", "n", "t", "f"}
 
 
 def run_checks(df: pd.DataFrame) -> list[str]:
@@ -86,6 +128,19 @@ def run_checks(df: pd.DataFrame) -> list[str]:
 
     if len(df) == 0:
         errors.append("Processed dataset is empty")
+
+    for col in BOOLEAN_FEATURE_COLUMNS:
+        non_null = df[col].dropna()
+        if not non_null.map(_is_bool_like).all():
+            errors.append(f"{col} must contain only boolean-like values")
+
+    for col in COUNT_FEATURE_COLUMNS:
+        numeric = pd.to_numeric(df[col], errors="coerce")
+        if numeric.isna().any():
+            errors.append(f"{col} must be numeric")
+            continue
+        if (numeric < 0).any():
+            errors.append(f"{col} must be non-negative")
 
     return errors
 
