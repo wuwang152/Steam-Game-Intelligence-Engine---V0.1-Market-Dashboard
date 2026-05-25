@@ -7,7 +7,14 @@ import io
 import pandas as pd
 import streamlit as st
 
-from app.utils import load_processed_data, rename_display_columns, top_split_values
+from app.utils import (
+    REVIEW_SENTIMENT_LABELS,
+    REVIEW_SIGNAL_LABELS,
+    load_processed_data,
+    map_display_series,
+    rename_display_columns,
+    top_split_values,
+)
 
 st.set_page_config(page_title="Steam 游戏智能分析看板", layout="wide")
 
@@ -24,6 +31,8 @@ PREVIEW_COLUMNS = [
     "Genres",
     "Tags",
 ]
+MAX_SCATTER_POINTS = 5000
+SCATTER_RANDOM_STATE = 42
 
 
 def _to_numeric(series: pd.Series) -> pd.Series:
@@ -206,7 +215,11 @@ def _show_charts(df: pd.DataFrame) -> None:
         scatter_df[positive_col] = _to_numeric(scatter_df[positive_col])
         scatter_df = scatter_df.dropna()
         if not scatter_df.empty:
-            c4.scatter_chart(scatter_df, x=owners_col, y=positive_col)
+            if len(scatter_df) > MAX_SCATTER_POINTS:
+                scatter_df = scatter_df.sample(n=MAX_SCATTER_POINTS, random_state=SCATTER_RANDOM_STATE)
+            scatter_df = scatter_df.rename(columns={owners_col: "拥有者中位估计", positive_col: "好评数"})
+            c4.scatter_chart(scatter_df, x="拥有者中位估计", y="好评数")
+            c4.caption("为提升渲染速度，散点图默认展示抽样结果。")
         else:
             c4.info("拥有者/好评列存在，但无可绘制数据。")
     else:
@@ -217,6 +230,10 @@ def _show_table(df: pd.DataFrame) -> None:
     st.subheader("筛选结果")
     available_preview_cols = [column for column in PREVIEW_COLUMNS if column in df.columns]
     preview_df = df[available_preview_cols].copy() if available_preview_cols else df.copy()
+    if "review_signal" in preview_df.columns:
+        preview_df["review_signal"] = map_display_series(preview_df["review_signal"], REVIEW_SIGNAL_LABELS)
+    if "review_sentiment" in preview_df.columns:
+        preview_df["review_sentiment"] = map_display_series(preview_df["review_sentiment"], REVIEW_SENTIMENT_LABELS)
     preview_rows = min(len(preview_df), 500)
     st.caption(f"显示前 {preview_rows:,} 行，共筛选出 {len(df):,} 款游戏")
     st.dataframe(rename_display_columns(preview_df.head(500)), use_container_width=True, hide_index=True)

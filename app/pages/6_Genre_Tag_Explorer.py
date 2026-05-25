@@ -1,6 +1,11 @@
 import streamlit as st
 
-from app.utils import get_available_columns, rename_display_columns, require_processed_data, top_split_values
+from app.utils import (
+    get_available_columns,
+    rename_display_columns,
+    require_processed_data,
+    top_split_values_cached,
+)
 
 st.title("类型/标签探索")
 df = require_processed_data()
@@ -16,15 +21,21 @@ else:
     filtered_df = df.copy()
 
 st.subheader("热门游戏类型")
-genre_counts = top_split_values(filtered_df, "Genres", sep=";", top_n=top_n)
-if not genre_counts.empty:
+if "Genres" in filtered_df.columns:
+    genre_counts = top_split_values_cached(filtered_df["Genres"], sep=";", top_n=top_n)
+else:
+    genre_counts = None
+if genre_counts is not None and not genre_counts.empty:
     st.bar_chart(genre_counts)
 else:
     st.info("Genres 列缺失或为空。")
 
 st.subheader("热门标签")
-tag_counts = top_split_values(filtered_df, "Tags", sep=";", top_n=top_n)
-if not tag_counts.empty:
+if "Tags" in filtered_df.columns:
+    tag_counts = top_split_values_cached(filtered_df["Tags"], sep=";", top_n=top_n)
+else:
+    tag_counts = None
+if tag_counts is not None and not tag_counts.empty:
     st.bar_chart(tag_counts)
 else:
     st.info("Tags 列缺失或为空。")

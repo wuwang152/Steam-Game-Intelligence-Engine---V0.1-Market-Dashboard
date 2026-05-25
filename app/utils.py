@@ -108,3 +108,12 @@ def top_split_values(df: pd.DataFrame, column: str, sep: str = ";", top_n: int =
     split_values = normalized.str.split(sep).explode().str.strip()
     clean_values = split_values[split_values != ""]
     return clean_values.value_counts().head(top_n)
+
+
+@st.cache_data(show_spinner=False)
+def top_split_values_cached(series: pd.Series, sep: str = ";", top_n: int = 20) -> pd.Series:
+    raw = series.dropna().astype(str)
+    normalized = raw.str.replace(",", sep, regex=False) if sep != "," else raw.str.replace(";", sep, regex=False)
+    split_values = normalized.str.split(sep).explode().str.strip()
+    clean_values = split_values[split_values != ""]
+    return clean_values.value_counts().head(top_n)
