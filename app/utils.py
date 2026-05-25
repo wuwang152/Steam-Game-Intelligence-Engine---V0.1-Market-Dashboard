@@ -71,6 +71,16 @@ DISPLAY_COLUMN_MAP = {
     "genre_count": "类型数量",
     "tag_count": "标签数量",
     "platform_count": "平台数量",
+    "genre": "游戏类型",
+    "tag": "标签",
+    "category": "功能分类",
+    "review_bucket": "评论数区间",
+    "owners_tier": "估计拥有者分层",
+    "language": "语言",
+    "simplified_chinese_support_share": "简体中文支持占比",
+    "english_support_share": "英文支持占比",
+    "japanese_support_share": "日文支持占比",
+    "korean_support_share": "韩文支持占比",
 }
 
 PRICE_BUCKET_LABELS = {"free": "免费", "budget": "低价", "mid": "中价", "premium": "高价", "luxury": "豪华价位"}
@@ -140,7 +150,7 @@ def format_ranking_table_for_display(df: pd.DataFrame) -> pd.DataFrame:
     }.items():
         if col in out.columns:
             out[col] = map_display_series(out[col], mp)
-    out = format_percent_columns(out, ["positive_rate", "positive_ratio", "share", "median_positive_rate_reviewed"])
+    out = format_percent_columns(out, ["positive_rate", "positive_ratio", "share", "median_positive_rate_reviewed", "simplified_chinese_support_share", "english_support_share", "japanese_support_share", "korean_support_share", "free_share", "discount_share"])
     out = format_count_columns(out, ["owners_mid", "owners_low", "owners_high", "total_reviews", "count", "median_owners_mid", "median_total_reviews"])
 
     for col in ["release_year", "AppID"]:

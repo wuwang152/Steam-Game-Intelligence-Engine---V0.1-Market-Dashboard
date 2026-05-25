@@ -1,4 +1,3 @@
-import pandas as pd
 import streamlit as st
 
 from app.dashboard_table_loader import load_dashboard_table
@@ -50,7 +49,12 @@ else:
 st.subheader("评论数区间与好评率中位数")
 bucket = load_dashboard_table("review_bucket_positive_rate")
 if bucket is not None and {"review_bucket", "count"}.issubset(bucket.columns):
-    st.bar_chart(bucket.set_index("review_bucket")["count"])
+    if "median_positive_rate_reviewed" in bucket.columns:
+        st.bar_chart(bucket.set_index("review_bucket")["median_positive_rate_reviewed"])
+        st.caption("该图展示不同评论数量区间下的有评论游戏好评率中位数。")
+    else:
+        st.bar_chart(bucket.set_index("review_bucket")["count"])
+        st.caption("未检测到 median_positive_rate_reviewed，当前图表为评论数区间数量兜底展示。")
     st.dataframe(format_ranking_table_for_display(bucket[[c for c in ["review_bucket", "count", "share", "median_positive_rate_reviewed"] if c in bucket.columns]]), use_container_width=True)
 else:
     _warn_missing("review_bucket_positive_rate")
