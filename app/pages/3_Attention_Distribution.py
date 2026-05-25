@@ -4,11 +4,10 @@ import streamlit as st
 from app.dashboard_table_loader import load_dashboard_table
 from app.utils import (
     REVIEW_SIGNAL_LABELS,
-    format_count_columns,
-    format_percent_columns,
     format_ranking_table_for_display,
     get_available_columns,
     map_display_series,
+    rename_display_columns,
     require_processed_data,
 )
 
@@ -60,8 +59,6 @@ if review_signal_table is not None and not review_signal_table.empty and {"revie
     ]
     preview = review_signal_table[[c for c in preview_cols if c in review_signal_table.columns]].copy()
     preview["review_signal"] = map_display_series(preview["review_signal"], REVIEW_SIGNAL_LABELS)
-    preview = format_count_columns(preview, ["count", "median_owners_mid"])
-    preview = format_percent_columns(preview, ["share", "median_positive_rate_reviewed"])
     st.dataframe(format_ranking_table_for_display(preview), use_container_width=True)
     st.caption("评论热度信号优先读取后端聚合表 review_signal_distribution.csv，反映全量样本的评论关注度结构。")
 else:

@@ -4,9 +4,7 @@ import streamlit as st
 from app.dashboard_table_loader import load_dashboard_table
 from app.utils import (
     REVIEW_SENTIMENT_LABELS,
-    format_count_columns,
     format_percent,
-    format_percent_columns,
     format_ranking_table_for_display,
     get_available_columns,
     map_display_series,
@@ -42,8 +40,6 @@ if sentiment_df is not None and not sentiment_df.empty and {"review_sentiment", 
     preview_cols = ["review_sentiment", "count", "share", "median_owners_mid", "median_total_reviews"]
     preview = sentiment_df[[c for c in preview_cols if c in sentiment_df.columns]].copy()
     preview["review_sentiment"] = map_display_series(preview["review_sentiment"], REVIEW_SENTIMENT_LABELS)
-    preview = _format_count_columns(preview, ["count", "median_owners_mid", "median_total_reviews"])
-    preview = _format_percent_columns(preview, ["share"])
     st.dataframe(format_ranking_table_for_display(preview), use_container_width=True)
     st.caption("口碑情绪分布优先读取后端聚合表 review_sentiment_distribution.csv，反映全量样本的口碑结构。")
 else:
@@ -64,8 +60,6 @@ if bucket_df is not None and not bucket_df.empty and {"review_bucket", "median_p
 
     preview_cols = ["review_bucket", "count", "share", "median_positive_rate_reviewed", "median_owners_mid"]
     preview = bucket_df[[c for c in preview_cols if c in bucket_df.columns]].copy()
-    preview = _format_count_columns(preview, ["count", "median_owners_mid"])
-    preview = _format_percent_columns(preview, ["share", "median_positive_rate_reviewed"])
     st.dataframe(format_ranking_table_for_display(preview), use_container_width=True)
     st.caption("不同评论数量区间下的好评率中位数基于有评论游戏计算，可减少无评论样本对口碑判断的干扰。")
 else:
@@ -93,13 +87,7 @@ if top_rated_df is not None and not top_rated_df.empty:
         "Name", "release_year", "price_bucket", "owners_mid", "total_reviews", "positive_rate", "supports_simplified_chinese", "Genres", "Tags"
     ]
     display_df = top_rated_df[[c for c in display_cols if c in top_rated_df.columns]].copy()
-    display_df = _format_count_columns(display_df, ["owners_mid", "total_reviews"])
-    display_df = _format_percent_columns(display_df, ["positive_rate"])
-    display_df = display_df.rename(columns={
-        "Name": "游戏名称", "release_year": "发行年份", "price_bucket": "价格分层", "owners_mid": "估计拥有者中位数",
-        "total_reviews": "评论数", "positive_rate": "好评率", "supports_simplified_chinese": "是否支持简体中文", "Genres": "游戏类型", "Tags": "标签"
-    })
-    st.dataframe(display_df, use_container_width=True)
+    st.dataframe(format_ranking_table_for_display(display_df), use_container_width=True)
     st.caption("高口碑榜要求达到最低评论数门槛，避免少量评论造成的极端好评率误导。")
 else:
     _backend_table_warning()
@@ -122,13 +110,7 @@ if risk_df is not None and not risk_df.empty:
         "Name", "release_year", "price_bucket", "owners_mid", "total_reviews", "positive_rate", "supports_simplified_chinese", "Genres", "Tags", "heuristic_reason"
     ]
     display_df = risk_df[[c for c in display_cols if c in risk_df.columns]].copy()
-    display_df = _format_count_columns(display_df, ["owners_mid", "total_reviews"])
-    display_df = _format_percent_columns(display_df, ["positive_rate"])
-    display_df = display_df.rename(columns={
-        "Name": "游戏名称", "release_year": "发行年份", "price_bucket": "价格分层", "owners_mid": "估计拥有者中位数",
-        "total_reviews": "评论数", "positive_rate": "好评率", "supports_simplified_chinese": "是否支持简体中文", "Genres": "游戏类型", "Tags": "标签", "heuristic_reason": "启发式原因"
-    })
-    st.dataframe(display_df, use_container_width=True)
+    st.dataframe(format_ranking_table_for_display(display_df), use_container_width=True)
     st.caption("该榜单为透明启发式筛选结果，用于识别评论量较高但好评率偏低的游戏，并非机器学习预测。")
 else:
     _backend_table_warning()

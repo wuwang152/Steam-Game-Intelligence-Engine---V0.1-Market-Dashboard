@@ -141,7 +141,11 @@ def format_ranking_table_for_display(df: pd.DataFrame) -> pd.DataFrame:
         if col in out.columns:
             out[col] = map_display_series(out[col], mp)
     out = format_percent_columns(out, ["positive_rate", "positive_ratio", "share", "median_positive_rate_reviewed"])
-    out = format_count_columns(out, ["owners_mid", "owners_low", "owners_high", "total_reviews", "count", "median_owners_mid", "median_total_reviews", "release_year", "AppID"])
+    out = format_count_columns(out, ["owners_mid", "owners_low", "owners_high", "total_reviews", "count", "median_owners_mid", "median_total_reviews"])
+
+    for col in ["release_year", "AppID"]:
+        if col in out.columns:
+            out[col] = pd.to_numeric(out[col], errors="coerce").map(lambda x: f"{x:.0f}" if pd.notna(x) else "—")
     out = format_boolean_columns(out, ["supports_simplified_chinese", "supports_english", "supports_japanese", "supports_korean", "has_chinese_audio"])
     return rename_display_columns(out)
 

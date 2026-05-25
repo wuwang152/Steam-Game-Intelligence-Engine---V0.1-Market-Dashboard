@@ -4,8 +4,6 @@ import pandas as pd
 from app.dashboard_table_loader import load_summary_metrics_row
 from app.utils import (
     PRICE_BUCKET_LABELS,
-    format_count_columns,
-    format_percent_columns,
     format_ranking_table_for_display,
     get_available_columns,
     map_display_series,
@@ -104,8 +102,6 @@ preview_cols = get_available_columns(
 st.subheader("筛选数据预览")
 if preview_cols:
     display_df = filtered_df[preview_cols].head(300).copy()
-    display_df = format_count_columns(display_df, ["owners_mid", "total_reviews"])
-    display_df = format_percent_columns(display_df, ["positive_ratio"])
     if "price_bucket" in display_df.columns:
         display_df["price_bucket"] = map_display_series(display_df["price_bucket"], PRICE_BUCKET_LABELS)
     st.dataframe(format_ranking_table_for_display(display_df), use_container_width=True)
