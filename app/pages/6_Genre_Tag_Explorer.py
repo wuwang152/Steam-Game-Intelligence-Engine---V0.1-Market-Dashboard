@@ -1,37 +1,37 @@
 import streamlit as st
 
-from app.utils import get_available_columns, require_processed_data, top_split_values
+from app.utils import get_available_columns, rename_display_columns, require_processed_data, top_split_values
 
-st.title("Genre/Tag Explorer")
+st.title("类型/标签探索")
 df = require_processed_data()
 
-st.sidebar.header("Genre/Tag Controls")
-top_n = st.sidebar.slider("Top N values", min_value=5, max_value=50, value=20, step=5)
+st.sidebar.header("类型/标签筛选")
+top_n = st.sidebar.slider("Top N 数量", min_value=5, max_value=50, value=20, step=5)
 
 if "tag_count" in df.columns and df["tag_count"].notna().any():
     max_tag_count = int(df["tag_count"].max())
-    min_tags = st.sidebar.slider("Minimum tag_count", min_value=0, max_value=max_tag_count, value=0)
+    min_tags = st.sidebar.slider("最小标签数（tag_count）", min_value=0, max_value=max_tag_count, value=0)
     filtered_df = df[df["tag_count"].fillna(0) >= min_tags].copy()
 else:
     filtered_df = df.copy()
 
-st.subheader("Top Genres")
+st.subheader("热门游戏类型")
 genre_counts = top_split_values(filtered_df, "Genres", sep=";", top_n=top_n)
 if not genre_counts.empty:
     st.bar_chart(genre_counts)
 else:
-    st.info("Genres column is missing or empty.")
+    st.info("Genres 列缺失或为空。")
 
-st.subheader("Top Tags")
+st.subheader("热门标签")
 tag_counts = top_split_values(filtered_df, "Tags", sep=";", top_n=top_n)
 if not tag_counts.empty:
     st.bar_chart(tag_counts)
 else:
-    st.info("Tags column is missing or empty.")
+    st.info("Tags 列缺失或为空。")
 
-st.subheader("Filtered Games Table")
+st.subheader("筛选游戏表")
 table_cols = get_available_columns(filtered_df, ["Name", "Genres", "Tags", "genre_count", "tag_count", "positive_ratio"])
 if table_cols:
-    st.dataframe(filtered_df[table_cols].head(300), use_container_width=True)
+    st.dataframe(rename_display_columns(filtered_df[table_cols].head(300)), use_container_width=True)
 else:
-    st.info("No standard genre/tag table columns are available.")
+    st.info("缺少可用于类型/标签展示的标准列。")
