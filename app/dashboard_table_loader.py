@@ -67,6 +67,13 @@ def load_required_dashboard_table(table_name: str, base_dir: Path | None = None)
     return df
 
 
+def load_summary_metrics_row(base_dir: Path | None = None) -> pd.Series | None:
+    df = load_dashboard_table("summary_metrics", base_dir=base_dir)
+    if df is None or df.empty:
+        return None
+    return df.iloc[0]
+
+
 def dashboard_tables_status(base_dir: Path | None = None) -> pd.DataFrame:
     rows: list[dict] = []
     for table_name in EXPECTED_DASHBOARD_TABLES:

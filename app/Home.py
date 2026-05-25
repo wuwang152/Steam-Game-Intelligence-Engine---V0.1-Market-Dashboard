@@ -7,6 +7,7 @@ import io
 import pandas as pd
 import streamlit as st
 
+from app.dashboard_table_loader import load_summary_metrics_row
 from app.utils import (
     REVIEW_SENTIMENT_LABELS,
     REVIEW_SIGNAL_LABELS,
@@ -33,6 +34,10 @@ PREVIEW_COLUMNS = [
 ]
 MAX_SCATTER_POINTS = 5000
 SCATTER_RANDOM_STATE = 42
+SUMMARY_METRICS_GENERATE_CMD = (
+    "python scripts/generate_dashboard_tables.py --input data/processed/steam_games_cleaned.csv "
+    "--output-dir data/processed/dashboard_tables --top-n 30 --min-reviews 20"
+)
 
 
 def _to_numeric(series: pd.Series) -> pd.Series:
@@ -135,6 +140,47 @@ def _apply_filters(df: pd.DataFrame) -> pd.DataFrame:
 
 def _show_kpis(df: pd.DataFrame) -> None:
     st.subheader("核心指标")
+    summary_metrics = load_summary_metrics_row()
+    if summary_metrics is not None:
+        st.caption("核心指标优先读取后端聚合表 summary_metrics.csv，确保前端展示与后端分析口径一致。")
+
+        def _fmt_int(metric_name: str) -> str:
+            value = pd.to_numeric(summary_metrics.get(metric_name), errors="coerce")
+            if pd.isna(value):
+                return "N/A"
+            return f"{int(round(float(value))):,}"
+
+        def _fmt_pct(metric_name: str) -> str:
+            value = pd.to_numeric(summary_metrics.get(metric_name), errors="coerce")
+            if pd.isna(value):
+                return "N/A"
+            return f"{float(value):.1%}"
+
+        st.markdown("##### 核心规模")
+        s1, s2, s3, s4 = st.columns(4)
+        s1.metric("游戏总数", _fmt_int("total_games"))
+        s2.metric("有评论游戏数", _fmt_int("games_with_reviews"))
+        s3.metric("有评论占比", _fmt_pct("share_with_reviews"))
+        s4.metric("估计拥有者中位数", _fmt_int("median_owners_mid"))
+
+        st.markdown("##### 口碑与价格")
+        s5, s6, s7, s8 = st.columns(4)
+        s5.metric("评论数中位数", _fmt_int("median_total_reviews"))
+        s6.metric("好评率中位数", _fmt_pct("median_positive_rate_reviewed"))
+        s7.metric("免费游戏占比", _fmt_pct("free_share"))
+        s8.metric("折扣游戏占比", _fmt_pct("discount_share"))
+
+        st.markdown("##### 语言与元数据覆盖")
+        s9, s10, s11, s12 = st.columns(4)
+        s9.metric("简中支持占比", _fmt_pct("simplified_chinese_support_share"))
+        s10.metric("英文支持占比", _fmt_pct("english_support_share"))
+        s11.metric("有标签数据游戏数", _fmt_int("games_with_tags"))
+        s12.metric("有开发商数据游戏数", _fmt_int("games_with_developer"))
+        return
+
+    st.warning("未检测到后端总览指标表。请先运行 generate_dashboard_tables.py 生成后端分析表。")
+    st.code(SUMMARY_METRICS_GENERATE_CMD, language="bash")
+
     k1, k2, k3 = st.columns(3)
     k4, k5, k6 = st.columns(3)
 

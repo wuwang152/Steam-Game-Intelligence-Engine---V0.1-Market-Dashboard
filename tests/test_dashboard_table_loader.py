@@ -15,6 +15,7 @@ from app.dashboard_table_loader import (
     list_available_dashboard_tables,
     list_missing_dashboard_tables,
     load_dashboard_table,
+    load_summary_metrics_row,
 )
 
 
@@ -34,6 +35,25 @@ def test_dashboard_table_exists_false_for_missing(tmp_path) -> None:
 
 def test_load_dashboard_table_missing_returns_none(tmp_path) -> None:
     assert load_dashboard_table("summary_metrics", base_dir=tmp_path) is None
+
+
+def test_load_summary_metrics_row_missing_returns_none(tmp_path) -> None:
+    assert load_summary_metrics_row(base_dir=tmp_path) is None
+
+
+def test_load_summary_metrics_row_empty_returns_none(tmp_path) -> None:
+    pd.DataFrame(columns=["total_games"]).to_csv(tmp_path / "summary_metrics.csv", index=False)
+    assert load_summary_metrics_row(base_dir=tmp_path) is None
+
+
+def test_load_summary_metrics_row_returns_first_row(tmp_path) -> None:
+    pd.DataFrame({"total_games": [100, 200], "share_with_reviews": [0.5, 0.7]}).to_csv(
+        tmp_path / "summary_metrics.csv",
+        index=False,
+    )
+    row = load_summary_metrics_row(base_dir=tmp_path)
+    assert row is not None
+    assert int(row["total_games"]) == 100
 
 
 def test_dashboard_tables_status_with_no_files(tmp_path) -> None:
