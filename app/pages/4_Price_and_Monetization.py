@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 
 from app.dashboard_table_loader import load_dashboard_table
-from app.utils import PRICE_BUCKET_LABELS, get_available_columns, map_display_series, rename_display_columns, require_processed_data
+from app.utils import PRICE_BUCKET_LABELS, format_count_columns, format_percent_columns, format_ranking_table_for_display, get_available_columns, map_display_series, rename_display_columns, require_processed_data
 
 PRICE_BUCKET_ORDER = ["free", "budget", "mid", "premium", "luxury"]
 GEN_CMD = "python scripts/generate_dashboard_tables.py --input data/processed/steam_games_cleaned.csv --output-dir data/processed/dashboard_tables --top-n 30 --min-reviews 20"
@@ -10,7 +10,7 @@ PRICE_BUCKET_CN = {"free": "免费", "budget": "低价", "mid": "中价", "premi
 
 
 def _show_missing_table_warning(*table_names: str) -> None:
-    st.warning("未检测到对应的后端聚合表。请先运行 generate_dashboard_tables.py 生成后端分析表。")
+    st.warning("未检测到对应的后端聚合表。请先运行 generate_dashboard_tables.py 生成后端聚合表。")
     st.caption(f"缺失表：{', '.join([f'{name}.csv' for name in table_names])}")
     st.code(GEN_CMD, language="bash")
 

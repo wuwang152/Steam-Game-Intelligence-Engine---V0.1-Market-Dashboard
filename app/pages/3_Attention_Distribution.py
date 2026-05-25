@@ -4,6 +4,7 @@ import streamlit as st
 from app.dashboard_table_loader import load_dashboard_table
 from app.utils import (
     REVIEW_SIGNAL_LABELS,
+    format_ranking_table_for_display,
     get_available_columns,
     map_display_series,
     rename_display_columns,
@@ -17,28 +18,8 @@ GEN_CMD = (
 )
 
 
-def _format_percent_columns(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    display_df = df.copy()
-    for col in columns:
-        if col in display_df.columns:
-            display_df[col] = pd.to_numeric(display_df[col], errors="coerce").map(
-                lambda x: f"{x:.1%}" if pd.notna(x) else "-"
-            )
-    return display_df
-
-
-def _format_count_columns(df: pd.DataFrame, columns: list[str]) -> pd.DataFrame:
-    display_df = df.copy()
-    for col in columns:
-        if col in display_df.columns:
-            display_df[col] = pd.to_numeric(display_df[col], errors="coerce").map(
-                lambda x: f"{x:,.0f}" if pd.notna(x) else "-"
-            )
-    return display_df
-
-
 def _backend_table_warning() -> None:
-    st.warning("未检测到对应的后端聚合表。请先运行 generate_dashboard_tables.py 生成后端分析表。")
+    st.warning("未检测到对应的后端聚合表。请先运行 generate_dashboard_tables.py 生成后端聚合表。")
     st.code(GEN_CMD)
 
 
@@ -77,10 +58,7 @@ if review_signal_table is not None and not review_signal_table.empty and {"revie
         "median_positive_rate_reviewed",
     ]
     preview = review_signal_table[[c for c in preview_cols if c in review_signal_table.columns]].copy()
-    preview["review_signal"] = map_display_series(preview["review_signal"], REVIEW_SIGNAL_LABELS)
-    preview = _format_count_columns(preview, ["count", "median_owners_mid"])
-    preview = _format_percent_columns(preview, ["share", "median_positive_rate_reviewed"])
-    st.dataframe(rename_display_columns(preview), use_container_width=True)
+    st.dataframe(format_ranking_table_for_display(preview), use_container_width=True)
     st.caption("评论热度信号优先读取后端聚合表 review_signal_distribution.csv，反映全量样本的评论关注度结构。")
 else:
     _backend_table_warning()
@@ -109,22 +87,7 @@ if "Name" in df.columns and "total_reviews" in df.columns:
             "Tags",
         ]
         display_df = top_reviews_table[[c for c in display_cols if c in top_reviews_table.columns]].copy()
-        display_df = _format_count_columns(display_df, ["owners_mid", "total_reviews"])
-        display_df = _format_percent_columns(display_df, ["positive_rate"])
-        display_df = display_df.rename(
-            columns={
-                "Name": "游戏名称",
-                "release_year": "发行年份",
-                "price_bucket": "价格分层",
-                "owners_mid": "估计拥有者中位数",
-                "total_reviews": "评论数",
-                "positive_rate": "好评率",
-                "supports_simplified_chinese": "是否支持简体中文",
-                "Genres": "游戏类型",
-                "Tags": "标签",
-            }
-        )
-        st.dataframe(display_df, use_container_width=True)
+        st.dataframe(format_ranking_table_for_display(display_df), use_container_width=True)
         st.caption("热门评论榜基于后端榜单表 top_games_by_reviews.csv，仅用于描述评论关注度，不代表个性化推荐。")
     else:
         _backend_table_warning()

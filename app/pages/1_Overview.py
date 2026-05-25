@@ -2,7 +2,12 @@ import streamlit as st
 import pandas as pd
 
 from app.dashboard_table_loader import load_summary_metrics_row
-from app.utils import PRICE_BUCKET_LABELS, get_available_columns, map_display_series, rename_display_columns, require_processed_data
+from app.utils import (
+    PRICE_BUCKET_LABELS,
+    format_ranking_table_for_display,
+    get_available_columns,
+    require_processed_data,
+)
 
 PRICE_BUCKET_ORDER = ["free", "budget", "mid", "premium", "luxury"]
 SUMMARY_METRICS_GENERATE_CMD = (
@@ -74,7 +79,7 @@ if summary_metrics is not None:
     m11.metric("有标签数据游戏数", _fmt_int("games_with_tags"))
     m12.metric("有开发商数据游戏数", _fmt_int("games_with_developer"))
 else:
-    st.warning("未检测到后端总览指标表。请先运行 generate_dashboard_tables.py 生成后端分析表。")
+    st.warning("未检测到后端聚合表（总览指标）。请先运行 generate_dashboard_tables.py 生成后端聚合表。")
     st.code(SUMMARY_METRICS_GENERATE_CMD, language="bash")
 
     m1, m2, m3 = st.columns(3)
@@ -95,14 +100,9 @@ preview_cols = get_available_columns(
 st.subheader("筛选数据预览")
 if preview_cols:
     display_df = filtered_df[preview_cols].head(300).copy()
-    if "owners_mid" in display_df.columns:
-        display_df["owners_mid"] = display_df["owners_mid"].map(lambda x: f"{x:,.0f}" if pd.notna(x) else "N/A")
-    if "total_reviews" in display_df.columns:
-        display_df["total_reviews"] = display_df["total_reviews"].map(lambda x: f"{x:,.0f}" if pd.notna(x) else "N/A")
-    if "positive_ratio" in display_df.columns:
-        display_df["positive_ratio"] = display_df["positive_ratio"].map(lambda x: f"{x:.1%}" if pd.notna(x) else "N/A")
-    if "price_bucket" in display_df.columns:
-        display_df["price_bucket"] = map_display_series(display_df["price_bucket"], PRICE_BUCKET_LABELS)
-    st.dataframe(rename_display_columns(display_df), use_container_width=True)
+    st.dataframe(format_ranking_table_for_display(display_df), use_container_width=True)
 else:
     st.info("数据集中缺少可用于总览的标准列。")
+
+
+st.caption("后端聚合表反映全量样本口径；若页面存在筛选器，请注意筛选结果与全量指标的区别。")
