@@ -1,6 +1,6 @@
 import streamlit as st
 
-from app.utils import format_percent, get_available_columns, rename_display_columns, require_processed_data
+from app.utils import REVIEW_SENTIMENT_LABELS, REVIEW_SIGNAL_LABELS, format_percent, get_available_columns, map_display_series, rename_display_columns, require_processed_data
 
 REVIEW_SIGNAL_ORDER = ["no_signal", "very_low", "low", "medium", "high"]
 REVIEW_SENTIMENT_ORDER = ["no_reviews", "weak", "mixed", "strong"]
@@ -10,14 +10,14 @@ df = require_processed_data()
 
 if "review_signal" in df.columns:
     st.subheader("评论热度信号分布")
-    signal_series = df["review_signal"].fillna("未知").astype(str)
+    signal_series = map_display_series(df["review_signal"], REVIEW_SIGNAL_LABELS)
     order = [x for x in REVIEW_SIGNAL_ORDER if x in signal_series.unique()]
     remainder = sorted([x for x in signal_series.unique() if x not in order])
     st.bar_chart(signal_series.value_counts().reindex(order + remainder, fill_value=0))
 
 if "review_sentiment" in df.columns:
     st.subheader("口碑情绪分布")
-    sentiment_series = df["review_sentiment"].fillna("未知").astype(str)
+    sentiment_series = map_display_series(df["review_sentiment"], REVIEW_SENTIMENT_LABELS)
     order = [x for x in REVIEW_SENTIMENT_ORDER if x in sentiment_series.unique()]
     remainder = sorted([x for x in sentiment_series.unique() if x not in order])
     st.bar_chart(sentiment_series.value_counts().reindex(order + remainder, fill_value=0))
@@ -34,7 +34,7 @@ if {"Name", "positive_ratio", "total_reviews"}.issubset(df.columns):
     filtered = df[df["total_reviews"].fillna(0) >= 20].copy()
     top_games = filtered.sort_values(["positive_ratio", "total_reviews"], ascending=[False, False]).head(30)
     top_games["positive_ratio"] = top_games["positive_ratio"].apply(format_percent)
-    st.dataframe(top_games[["Name", "positive_ratio", "total_reviews"]], use_container_width=True)
+    st.dataframe(rename_display_columns(top_games[["Name", "positive_ratio", "total_reviews"]]), use_container_width=True)
 else:
     preview_cols = get_available_columns(df, ["Name", "positive_ratio", "total_reviews"])
     if preview_cols:

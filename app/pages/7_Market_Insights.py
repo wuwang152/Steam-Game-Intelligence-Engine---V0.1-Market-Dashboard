@@ -2,7 +2,16 @@ import numpy as np
 import pandas as pd
 import streamlit as st
 
-from app.utils import get_available_columns, rename_display_columns, require_processed_data, safe_column
+from app.utils import (
+    PRICE_BUCKET_LABELS,
+    REVIEW_SENTIMENT_LABELS,
+    REVIEW_SIGNAL_LABELS,
+    get_available_columns,
+    map_display_series,
+    rename_display_columns,
+    require_processed_data,
+    safe_column,
+)
 
 REQUIRED_V2_COLUMNS = [
     "release_year",
@@ -82,6 +91,8 @@ def prepare_display_table(df: pd.DataFrame, sort_cols: list[str], ascending: lis
         display_df["positive_rate"] = display_df["positive_rate"].map(format_percent_safe)
     if "platform_count" in display_df.columns:
         display_df["platform_count"] = display_df["platform_count"].map(format_int)
+    if "price_bucket" in display_df.columns:
+        display_df["price_bucket"] = map_display_series(display_df["price_bucket"], PRICE_BUCKET_LABELS)
 
     return display_df
 
@@ -118,7 +129,13 @@ if filtered_df["release_year"].notna().any():
 bucket_options = sorted(filtered_df["price_bucket"].dropna().astype(str).unique().tolist())
 bucket_options = [b for b in PRICE_BUCKET_ORDER if b in bucket_options] + [b for b in bucket_options if b not in PRICE_BUCKET_ORDER]
 if bucket_options:
-    selected_buckets = st.sidebar.multiselect("价格分层", options=bucket_options, default=bucket_options)
+    bucket_labels = {x: PRICE_BUCKET_LABELS.get(x, x) for x in bucket_options}
+    selected_bucket_labels = st.sidebar.multiselect(
+        "价格分层",
+        options=[bucket_labels[x] for x in bucket_options],
+        default=[bucket_labels[x] for x in bucket_options],
+    )
+    selected_buckets = [k for k, v in bucket_labels.items() if v in selected_bucket_labels]
     if selected_buckets:
         filtered_df = filtered_df[filtered_df["price_bucket"].astype(str).isin(selected_buckets)]
 
@@ -147,7 +164,7 @@ st.caption(
     "筛选摘要："
     f"{len(filtered_df):,} 款游戏 | "
     f"发行年份： {f'{selected_years[0]}–{selected_years[1]}' if selected_years else '全部'} | "
-    f"价格分层： {', '.join(selected_buckets) if selected_buckets else '全部'} | "
+    f"价格分层： {', '.join(PRICE_BUCKET_LABELS.get(x, x) for x in selected_buckets) if selected_buckets else '全部'} | "
     f"最小评论数（total_reviews）: {review_floor:,}"
 )
 
@@ -180,7 +197,7 @@ with market_tab:
         st.info("当前筛选条件下无发行年份数据。")
 
     st.caption("价格分层分布：不同定价区间的游戏数量。")
-    bucket_series = safe_column(filtered_df, "price_bucket", "未知").fillna("未知").astype(str)
+    bucket_series = map_display_series(safe_column(filtered_df, "price_bucket", "未知"), PRICE_BUCKET_LABELS)
     bucket_order = [x for x in PRICE_BUCKET_ORDER if x in bucket_series.unique()]
     bucket_remainder = sorted([x for x in bucket_series.unique() if x not in bucket_order])
     bucket_counts = bucket_series.value_counts().reindex(bucket_order + bucket_remainder, fill_value=0)
@@ -201,7 +218,7 @@ with market_tab:
         st.info("无可用于分布绘图的有效 owners_mid 数据。")
 
     st.caption("评论热度信号分布：来自 V0.2 特征的质量/规模分层。")
-    signal_series = safe_column(filtered_df, "review_signal", "未知").fillna("未知").astype(str)
+    signal_series = map_display_series(safe_column(filtered_df, "review_signal", "未知"), REVIEW_SIGNAL_LABELS)
     signal_order = [x for x in REVIEW_SIGNAL_ORDER if x in signal_series.unique()]
     signal_remainder = sorted([x for x in signal_series.unique() if x not in signal_order])
     signal_counts = signal_series.value_counts().reindex(signal_order + signal_remainder, fill_value=0)
@@ -211,7 +228,7 @@ with market_tab:
         st.info("当前筛选条件下无 review_signal 数据。")
 
     st.caption("口碑情绪分布：筛选后游戏的情绪分组数量。")
-    sentiment_series = safe_column(filtered_df, "review_sentiment", "未知").fillna("未知").astype(str)
+    sentiment_series = map_display_series(safe_column(filtered_df, "review_sentiment", "未知"), REVIEW_SENTIMENT_LABELS)
     sentiment_order = [x for x in REVIEW_SENTIMENT_ORDER if x in sentiment_series.unique()]
     sentiment_remainder = sorted([x for x in sentiment_series.unique() if x not in sentiment_order])
     sentiment_counts = sentiment_series.value_counts().reindex(sentiment_order + sentiment_remainder, fill_value=0)
@@ -253,14 +270,14 @@ with ranking_tab:
     st.caption("榜单按数值排序，并仅在展示层进行格式化。")
 
     top_owners_df = prepare_display_table(filtered_df, ["owners_mid", "total_reviews"], [False, False], limit=20)
-    st.caption("Top 款游戏 by Estimated Owners Midpoint")
+    st.caption("按估计拥有者数量排序的热门游戏")
     if top_owners_df.empty:
         st.info("当前筛选条件下无可用于 owners_mid 排名的数据。")
     else:
         st.dataframe(rename_display_columns(top_owners_df), use_container_width=True)
 
     top_reviews_df = prepare_display_table(filtered_df, ["total_reviews", "owners_mid"], [False, False], limit=20)
-    st.caption("Top 款游戏 by Total Reviews")
+    st.caption("按评论数排序的热门游戏")
     if top_reviews_df.empty:
         st.info("当前筛选条件下无可用于 total_reviews 排名的数据。")
     else:
@@ -269,16 +286,14 @@ with ranking_tab:
     min_reviews_for_rating = max(20, int(numeric_series(filtered_df, "total_reviews").median()) if numeric_series(filtered_df, "total_reviews").notna().any() else 20)
     top_rated = filtered_df[numeric_series(filtered_df, "total_reviews").fillna(0) >= min_reviews_for_rating].copy()
     top_rated_df = prepare_display_table(top_rated, ["positive_rate", "total_reviews"], [False, False], limit=20)
-    st.caption(f"Top rated 款游戏 by Positive Rate (minimum {min_reviews_for_rating:,} 条评论）")
+    st.caption(f"按好评率排序的高分游戏（至少 {min_reviews_for_rating:,} 条评论）")
     if top_rated_df.empty:
         st.info("没有游戏满足评分榜单的最低评论门槛。")
     else:
         st.dataframe(rename_display_columns(top_rated_df), use_container_width=True)
 
     st.subheader("潜力佳作")
-    st.caption(
-        "潜力佳作: Heuristic candidates, not model predictions."
-    )
+    st.caption("潜力佳作：基于启发式规则筛选，并非模型预测结果。")
     hidden_gems = filtered_df[
         (numeric_series(filtered_df, "positive_rate") >= 0.85)
         & (numeric_series(filtered_df, "total_reviews") >= 20)

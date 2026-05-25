@@ -1,4 +1,4 @@
-"""Steam 游戏智能分析看板 dashboard home page."""
+"""Steam Game Intelligence Engine dashboard home page."""
 
 from __future__ import annotations
 

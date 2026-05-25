@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 
-from app.utils import get_available_columns, rename_display_columns, require_processed_data
+from app.utils import PRICE_BUCKET_LABELS, get_available_columns, map_display_series, rename_display_columns, require_processed_data
 
 PRICE_BUCKET_ORDER = ["free", "budget", "mid", "premium", "luxury"]
 
@@ -18,7 +18,13 @@ if "release_year" in filtered_df.columns and filtered_df["release_year"].notna()
 
 if "price_bucket" in filtered_df.columns:
     options = [b for b in PRICE_BUCKET_ORDER if b in filtered_df["price_bucket"].dropna().astype(str).unique()]
-    selected_buckets = st.sidebar.multiselect("价格分层", options=options, default=options)
+    option_labels = {x: PRICE_BUCKET_LABELS.get(x, x) for x in options}
+    selected_labels = st.sidebar.multiselect(
+        "价格分层",
+        options=[option_labels[x] for x in options],
+        default=[option_labels[x] for x in options],
+    )
+    selected_buckets = [k for k, v in option_labels.items() if v in selected_labels]
     if selected_buckets:
         filtered_df = filtered_df[filtered_df["price_bucket"].astype(str).isin(selected_buckets)]
 
@@ -46,6 +52,8 @@ if preview_cols:
         display_df["total_reviews"] = display_df["total_reviews"].map(lambda x: f"{x:,.0f}" if pd.notna(x) else "N/A")
     if "positive_ratio" in display_df.columns:
         display_df["positive_ratio"] = display_df["positive_ratio"].map(lambda x: f"{x:.1%}" if pd.notna(x) else "N/A")
+    if "price_bucket" in display_df.columns:
+        display_df["price_bucket"] = map_display_series(display_df["price_bucket"], PRICE_BUCKET_LABELS)
     st.dataframe(rename_display_columns(display_df), use_container_width=True)
 else:
     st.info("数据集中缺少可用于总览的标准列。")

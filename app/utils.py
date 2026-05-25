@@ -56,9 +56,43 @@ DISPLAY_COLUMN_MAP = {
     "platform_count": "平台数量",
 }
 
+PRICE_BUCKET_LABELS = {
+    "free": "免费",
+    "budget": "低价",
+    "mid": "中价",
+    "premium": "高价",
+    "luxury": "豪华价位",
+}
+
+REVIEW_SIGNAL_LABELS = {
+    "no_signal": "无信号",
+    "very_low": "极低",
+    "low": "较低",
+    "medium": "中等",
+    "high": "较高",
+}
+
+REVIEW_SENTIMENT_LABELS = {
+    "no_reviews": "无评论",
+    "weak": "较弱",
+    "mixed": "一般",
+    "strong": "较强",
+}
+
 
 def rename_display_columns(df: pd.DataFrame) -> pd.DataFrame:
     return df.rename(columns=DISPLAY_COLUMN_MAP)
+
+
+def map_display_value(value, mapping: dict[str, str]) -> str:
+    if pd.isna(value):
+        return "未知"
+    key = str(value)
+    return mapping.get(key, key)
+
+
+def map_display_series(series: pd.Series, mapping: dict[str, str]) -> pd.Series:
+    return series.map(lambda x: map_display_value(x, mapping))
 
 
 def get_available_columns(df: pd.DataFrame, columns: list[str]) -> list[str]:

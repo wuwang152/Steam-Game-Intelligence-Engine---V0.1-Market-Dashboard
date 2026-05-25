@@ -1,6 +1,6 @@
 import streamlit as st
 
-from app.utils import get_available_columns, rename_display_columns, require_processed_data
+from app.utils import REVIEW_SIGNAL_LABELS, get_available_columns, map_display_series, rename_display_columns, require_processed_data
 
 REVIEW_SIGNAL_ORDER = ["no_signal", "very_low", "low", "medium", "high"]
 
@@ -22,7 +22,7 @@ else:
 
 if "review_signal" in df.columns:
     st.subheader("评论热度信号分布")
-    signal_series = df["review_signal"].fillna("未知").astype(str)
+    signal_series = map_display_series(df["review_signal"], REVIEW_SIGNAL_LABELS)
     ordered = [x for x in REVIEW_SIGNAL_ORDER if x in signal_series.unique()]
     remainder = sorted([x for x in signal_series.unique() if x not in ordered])
     review_signal_counts = signal_series.value_counts().reindex(ordered + remainder, fill_value=0)
