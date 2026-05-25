@@ -1,3 +1,4 @@
+import pandas as pd
 import streamlit as st
 
 from app.utils import REVIEW_SENTIMENT_LABELS, REVIEW_SIGNAL_LABELS, format_percent, get_available_columns, map_display_series, rename_display_columns, require_processed_data
@@ -24,10 +25,19 @@ if "review_sentiment" in df.columns:
 
 if "total_reviews" in df.columns and "positive_ratio" in df.columns:
     st.subheader("评论数与好评率")
-    st.caption("好评率对有评论的游戏更有参考意义。")
+    st.caption("按评论数分桶展示中位好评率，更轻量且更易解释。")
     scatter_df = df[["total_reviews", "positive_ratio"]].dropna().copy()
-    scatter_df["positive_percent"] = scatter_df["positive_ratio"] * 100
-    st.line_chart(scatter_df.sort_values("total_reviews").set_index("total_reviews")["positive_percent"])
+    bins = [20, 100, 500, 1_000, 5_000, 10_000, 50_000, float("inf")]
+    labels = ["20–100", "100–500", "500–1k", "1k–5k", "5k–10k", "10k–50k", "50k+"]
+    scatter_df = scatter_df[scatter_df["total_reviews"] >= 20]
+    scatter_df["评论数分桶"] = pd.cut(scatter_df["total_reviews"], bins=bins, labels=labels, right=False, include_lowest=True)
+    bucket_median = (
+        scatter_df.groupby("评论数分桶", observed=False)["positive_ratio"]
+        .median()
+        .mul(100)
+        .rename("中位好评率（%）")
+    )
+    st.bar_chart(bucket_median.dropna(), x_label="评论数分桶", y_label="中位好评率（%）")
 
 if {"Name", "positive_ratio", "total_reviews"}.issubset(df.columns):
     st.subheader("按好评率排序的热门游戏（至少 20 条评论）")

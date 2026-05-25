@@ -43,6 +43,8 @@ PRICE_BUCKET_ORDER = ["free", "budget", "mid", "premium", "luxury"]
 REVIEW_SIGNAL_ORDER = ["no_signal", "very_low", "low", "medium", "high"]
 REVIEW_SENTIMENT_ORDER = ["no_reviews", "weak", "mixed", "strong"]
 PLATFORM_COUNT_ORDER = [0, 1, 2, 3]
+MAX_SCATTER_POINTS = 5000
+SCATTER_RANDOM_STATE = 42
 
 
 def numeric_series(df: pd.DataFrame, column: str) -> pd.Series:
@@ -183,9 +185,9 @@ k5.metric("免费游戏占比", format_percent_safe(safe_share(safe_column(filte
 k6.metric("折扣游戏占比", format_percent_safe(safe_share(safe_column(filtered_df, "has_discount", False))))
 st.caption("KPI 基于当前筛选样本计算，并对缺失值进行稳健处理。")
 
-market_tab, review_tab, ranking_tab = st.tabs(["市场结构", "评论与热度", "排行榜"])
+selected_section = st.radio("选择分析板块", ["市场结构", "评论与热度", "排行榜"], horizontal=True)
 
-with market_tab:
+if selected_section == "市场结构":
     st.subheader("市场结构")
 
     st.caption("按 release_year 的游戏数量：筛选后的年度分布。")
@@ -237,8 +239,9 @@ with market_tab:
     else:
         st.info("当前筛选条件下无 review_sentiment 数据。")
 
-with review_tab:
+if selected_section == "评论与热度":
     st.subheader("评论与热度")
+    st.caption("为提升渲染速度，散点图默认展示抽样结果。")
 
     st.caption("有评论游戏的 owners_mid 与好评率关系：拥有者规模与口碑关系。")
     st.caption("好评率对有评论的游戏更有参考意义。")
@@ -249,8 +252,11 @@ with review_tab:
     ][["owners_mid", "positive_rate"]].copy()
     if not scatter_a.empty:
         scatter_a["owners_mid"] = pd.to_numeric(scatter_a["owners_mid"], errors="coerce")
-        scatter_a = scatter_a.sort_values("owners_mid")
-        st.scatter_chart(scatter_a, x="owners_mid", y="positive_rate")
+        scatter_a = scatter_a.dropna().sort_values("owners_mid")
+        if len(scatter_a) > MAX_SCATTER_POINTS:
+            scatter_a = scatter_a.sample(n=MAX_SCATTER_POINTS, random_state=SCATTER_RANDOM_STATE)
+        scatter_a = scatter_a.rename(columns={"owners_mid": "拥有者中位估计", "positive_rate": "好评率"})
+        st.scatter_chart(scatter_a, x="拥有者中位估计", y="好评率")
     else:
         st.info("当前筛选条件下无可用于 owners_mid vs positive_rate 的有效数据。")
 
@@ -261,11 +267,15 @@ with review_tab:
         & numeric_series(filtered_df, "positive_rate").notna()
     ][["review_log", "positive_rate"]].copy()
     if not scatter_b.empty:
-        st.scatter_chart(scatter_b, x="review_log", y="positive_rate")
+        scatter_b = scatter_b.dropna()
+        if len(scatter_b) > MAX_SCATTER_POINTS:
+            scatter_b = scatter_b.sample(n=MAX_SCATTER_POINTS, random_state=SCATTER_RANDOM_STATE)
+        scatter_b = scatter_b.rename(columns={"review_log": "评论量对数", "positive_rate": "好评率"})
+        st.scatter_chart(scatter_b, x="评论量对数", y="好评率")
     else:
         st.info("当前筛选条件下无可用于 review_log vs positive_rate 的有效数据。")
 
-with ranking_tab:
+if selected_section == "排行榜":
     st.subheader("热门游戏")
     st.caption("榜单按数值排序，并仅在展示层进行格式化。")
 
