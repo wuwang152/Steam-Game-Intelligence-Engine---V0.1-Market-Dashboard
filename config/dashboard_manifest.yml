@@ -5,7 +5,7 @@ pages:
     required_tables:
       - summary_metrics
     optional_figures:
-      - docs/assets/dashboard_home.png
+      - docs/assets/system_flow.png
 
   - key: market_structure
     page_name: 市场结构
@@ -15,7 +15,8 @@ pages:
       - price_bucket_distribution
       - owners_tier_distribution
       - platform_count_distribution
-    optional_figures: []
+    optional_figures:
+      - docs/assets/market_structure_framework.png
 
   - key: reputation_attention
     page_name: 口碑与热度
@@ -27,7 +28,7 @@ pages:
       - top_games_by_reviews
       - top_rated_games
     optional_figures:
-      - docs/assets/dashboard_attention.png
+      - docs/assets/reputation_attention_logic.png
 
   - key: track_localization
     page_name: 赛道与本地化
@@ -39,7 +40,7 @@ pages:
       - language_support_summary
       - localization_by_genre
     optional_figures:
-      - docs/assets/dashboard_genre_tag.png
+      - docs/assets/localization_framework.png
 
   - key: opportunity_identification
     page_name: 机会识别
@@ -50,7 +51,8 @@ pages:
       - high_attention_low_rating
       - chinese_supported_potential
       - localization_opportunities
-    optional_figures: []
+    optional_figures:
+      - docs/assets/opportunity_logic.png
 
   - key: backend_table_preview
     page_name: 后端聚合表预览
