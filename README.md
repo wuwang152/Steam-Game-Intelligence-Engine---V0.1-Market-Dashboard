@@ -89,18 +89,26 @@ streamlit run .\app\Home.py
 ```
 
 ## Dashboard overview
-V0.2 dashboard modules:
+Current dashboard page structure:
 
 - `app/Home.py`
-- `app/pages/1_Overview.py`
-- `app/pages/2_Release_Dynamics.py`
-- `app/pages/3_Attention_Distribution.py`
-- `app/pages/4_Price_and_Monetization.py`
-- `app/pages/5_Reputation_Signals.py`
-- `app/pages/6_Genre_Tag_Explorer.py`
-- `app/pages/7_Market_Insights.py`
+- `app/pages/1_市场结构.py`
+- `app/pages/2_口碑与热度.py`
+- `app/pages/3_赛道与本地化.py`
+- `app/pages/4_机会识别.py`
+- `app/pages/5_后端聚合表预览.py`
 
-These modules provide baseline market exploration views for pricing, release cadence, review activity, and genre/tag distribution.
+These modules provide end-to-end views across market structure, reputation/attention, track-localization analysis, opportunity discovery, and backend aggregation table previewing.
+
+
+## V0.3 planning focus
+- V0.3 focuses on source transparency, UI structure, visual diversity, and presentation assets.
+- Raw and processed full datasets remain local and are not committed to GitHub.
+- Dashboard aggregation tables should be generated locally using:
+
+```bash
+python scripts/generate_dashboard_tables.py --input data/processed/steam_games_cleaned.csv --output-dir data/processed/dashboard_tables --top-n 30 --min-reviews 20
+```
 
 ## Market insights report
 - V0.2 report artifact: [`reports/steam_market_insights_v0.2.md`](reports/steam_market_insights_v0.2.md)
