@@ -1,0 +1,60 @@
+pages:
+  - key: home
+    page_name: Home
+    source_type: mixed
+    required_tables:
+      - summary_metrics
+    optional_figures:
+      - docs/assets/dashboard_home.png
+
+  - key: market_structure
+    page_name: 市场结构
+    source_type: dashboard_tables
+    required_tables:
+      - yearly_release_counts
+      - price_bucket_distribution
+      - owners_tier_distribution
+      - platform_count_distribution
+    optional_figures: []
+
+  - key: reputation_attention
+    page_name: 口碑与热度
+    source_type: dashboard_tables
+    required_tables:
+      - review_signal_distribution
+      - review_sentiment_distribution
+      - review_bucket_positive_rate
+      - top_games_by_reviews
+      - top_rated_games
+    optional_figures:
+      - docs/assets/dashboard_attention.png
+
+  - key: track_localization
+    page_name: 赛道与本地化
+    source_type: dashboard_tables
+    required_tables:
+      - genre_distribution
+      - tag_distribution
+      - category_distribution
+      - language_support_summary
+      - localization_by_genre
+    optional_figures:
+      - docs/assets/dashboard_genre_tag.png
+
+  - key: opportunity_identification
+    page_name: 机会识别
+    source_type: dashboard_tables
+    required_tables:
+      - hidden_gems
+      - low_price_high_rating
+      - high_attention_low_rating
+      - chinese_supported_potential
+      - localization_opportunities
+    optional_figures: []
+
+  - key: backend_table_preview
+    page_name: 后端聚合表预览
+    source_type: dashboard_tables
+    required_tables:
+      - dashboard_tables/*
+    optional_figures: []
