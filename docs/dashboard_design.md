@@ -36,12 +36,21 @@ V0.3 focuses on improving dashboard communication quality through:
 - Quadrant chart for risk/opportunity segmentation.
 - Heuristic ranking tables with concise strategy notes.
 
+
+## Homepage system flow diagram
+
+The homepage system flow diagram is stored as the text-based SVG asset `docs/assets/system_flow.svg`. It explains the three-layer architecture across data sources, processing and aggregation, and the Streamlit presentation layer. The asset is an architecture and data-lineage reference only, so it does not duplicate dynamic dashboard charts. Regenerate it with:
+
+```bash
+python scripts/generate_system_flow_svg.py
+```
+
 ## Figure usage policy (docs/assets)
 
 Use figures under `docs/assets/` when they improve understanding of architecture or analysis logic. Avoid static images that simply duplicate dynamic Streamlit charts that are already rendered from live tables.
 
 
-## 前端组件化（PR 2）
+## Frontend componentization (PR 2)
 
-- 新增 `app/components/` 统一承载轻量 UI 复用组件：`cards.py`、`charts.py`、`figure_panel.py`、`source_badge.py`。
-- `Home.py` 与 `4_机会识别.py` 优先使用组件进行 KPI、说明卡片、来源标识与可选图展示，保持后端表缺失时的兜底行为。
+- Added `app/components/` as the shared home for lightweight reusable UI components: `cards.py`, `charts.py`, `figure_panel.py`, and `source_badge.py`.
+- `Home.py` and `4_机会识别.py` use components for KPIs, insight cards, source badges, and optional figure rendering while preserving fallback behavior when backend tables are missing.

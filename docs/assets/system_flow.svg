@@ -1,0 +1,102 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="850" viewBox="0 0 1600 850" role="img" aria-labelledby="title desc">
+  <title id="title">Steam 游戏市场智能分析与机会识别看板：三层系统架构与数据流</title>
+  <desc id="desc">中文流程图展示数据源层、处理与聚合层、Streamlit 中文展示层，以及从数据源到看板页面的数据流。</desc>
+  <defs>
+    <style>
+      text { font-family: "Microsoft YaHei", "SimHei", "Noto Sans CJK SC", sans-serif; fill: #1f2937; }
+      .title { font-size: 42px; font-weight: 700; fill: #0f172a; }
+      .subtitle { font-size: 28px; font-weight: 600; fill: #334155; }
+      .section-title { font-size: 30px; font-weight: 700; fill: #0f172a; }
+      .card-title { font-size: 24px; font-weight: 700; fill: #111827; }
+      .card-text { font-size: 19px; fill: #475569; }
+      .pill-text { font-size: 20px; font-weight: 650; fill: #1e3a8a; }
+      .small { font-size: 18px; fill: #475569; }
+      .flow-text { font-size: 22px; font-weight: 650; fill: #0f766e; }
+    </style>
+    <linearGradient id="background" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f8fafc"/>
+      <stop offset="100%" stop-color="#eef6ff"/>
+    </linearGradient>
+    <filter id="softShadow" x="-10%" y="-10%" width="120%" height="130%">
+      <feDropShadow dx="0" dy="10" stdDeviation="10" flood-color="#94a3b8" flood-opacity="0.20"/>
+    </filter>
+    <marker id="arrow" markerWidth="14" markerHeight="14" refX="11" refY="7" orient="auto" markerUnits="strokeWidth">
+      <path d="M 1 1 L 12 7 L 1 13 z" fill="#0f766e"/>
+    </marker>
+  </defs>
+
+  <rect width="1600" height="850" fill="url(#background)"/>
+  <circle cx="1450" cy="95" r="180" fill="#dbeafe" opacity="0.55"/>
+  <circle cx="105" cy="760" r="210" fill="#ccfbf1" opacity="0.45"/>
+
+  <text x="800" y="72" text-anchor="middle" class="title">Steam 游戏市场智能分析与机会识别看板</text>
+  <text x="800" y="116" text-anchor="middle" class="subtitle">三层系统架构与数据流</text>
+
+  <rect x="70" y="165" width="430" height="500" rx="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#softShadow)"/>
+  <rect x="95" y="195" width="380" height="62" rx="20" fill="#dbeafe"/>
+  <text x="285" y="237" text-anchor="middle" class="section-title">数据源层</text>
+
+  <rect x="115" y="295" width="340" height="125" rx="20" fill="#f8fafc" stroke="#bfdbfe" stroke-width="2"/>
+  <text x="140" y="332" class="card-title">原始 Steam 数据集</text>
+  <text x="140" y="365" class="card-text">data/raw/steam_games.csv</text>
+  <text x="140" y="398" class="card-text">本地保存，不提交至 GitHub</text>
+
+  <rect x="115" y="455" width="340" height="125" rx="20" fill="#f8fafc" stroke="#bfdbfe" stroke-width="2"/>
+  <text x="140" y="492" class="card-title">示例数据集</text>
+  <text x="140" y="525" class="card-text">data/sample/games_sample.csv</text>
+  <text x="140" y="558" class="card-text">用于复现、测试与演示</text>
+
+  <rect x="585" y="165" width="520" height="500" rx="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#softShadow)"/>
+  <rect x="615" y="195" width="460" height="62" rx="20" fill="#dcfce7"/>
+  <text x="845" y="237" text-anchor="middle" class="section-title">处理与聚合层</text>
+
+  <rect x="625" y="288" width="205" height="108" rx="20" fill="#f8fafc" stroke="#bbf7d0" stroke-width="2"/>
+  <text x="650" y="326" class="card-title">数据清洗</text>
+  <text x="650" y="361" class="card-text">scripts/run_pipeline.py</text>
+
+  <rect x="860" y="288" width="205" height="108" rx="20" fill="#f8fafc" stroke="#bbf7d0" stroke-width="2"/>
+  <text x="885" y="326" class="card-title">后端聚合表</text>
+  <text x="885" y="361" class="card-text">scripts/generate_</text>
+  <text x="885" y="386" class="card-text">dashboard_tables.py</text>
+
+  <rect x="625" y="430" width="440" height="86" rx="20" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
+  <text x="650" y="464" class="card-title">分析特征工程</text>
+  <text x="650" y="497" class="card-text">价格分层 · 评论信号 · 拥有者估计 · 本地化标记</text>
+
+  <rect x="625" y="548" width="440" height="86" rx="20" fill="#f0fdf4" stroke="#86efac" stroke-width="2"/>
+  <text x="650" y="582" class="card-title">启发式榜单</text>
+  <text x="650" y="615" class="card-text">隐藏精品 · 低价高口碑 · 本地化机会 · 风险观察</text>
+
+  <rect x="1190" y="165" width="340" height="500" rx="28" fill="#ffffff" stroke="#cbd5e1" stroke-width="2" filter="url(#softShadow)"/>
+  <rect x="1215" y="195" width="290" height="62" rx="20" fill="#ede9fe"/>
+  <text x="1360" y="237" text-anchor="middle" class="section-title">Streamlit 中文展示层</text>
+
+  <rect x="1225" y="292" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="321" text-anchor="middle" class="pill-text">首页</text>
+
+  <rect x="1225" y="350" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="379" text-anchor="middle" class="pill-text">市场结构</text>
+
+  <rect x="1225" y="408" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="437" text-anchor="middle" class="pill-text">口碑与热度</text>
+
+  <rect x="1225" y="466" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="495" text-anchor="middle" class="pill-text">赛道与本地化</text>
+
+  <rect x="1225" y="524" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="553" text-anchor="middle" class="pill-text">机会识别</text>
+
+  <rect x="1225" y="582" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="611" text-anchor="middle" class="pill-text">后端聚合表预览</text>
+
+  <path d="M 500 415 L 570 415" stroke="#0f766e" stroke-width="5" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M 1105 415 L 1175 415" stroke="#0f766e" stroke-width="5" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M 725 396 L 725 424" stroke="#0f766e" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+  <path d="M 845 516 L 845 542" stroke="#0f766e" stroke-width="4" stroke-linecap="round" marker-end="url(#arrow)"/>
+
+  <rect x="145" y="700" width="1310" height="58" rx="24" fill="#ffffff" stroke="#99f6e4" stroke-width="2"/>
+  <text x="800" y="737" text-anchor="middle" class="flow-text">数据源层 → 数据清洗与特征工程 → 后端聚合表与启发式榜单 → Streamlit 中文展示层</text>
+
+  <rect x="470" y="780" width="660" height="42" rx="21" fill="#ecfeff" stroke="#67e8f9" stroke-width="2"/>
+  <text x="800" y="808" text-anchor="middle" class="small">描述性分析 · 可解释启发式规则 · 暂不包含机器学习预测</text>
+</svg>
