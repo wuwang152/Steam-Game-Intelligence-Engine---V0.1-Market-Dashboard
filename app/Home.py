@@ -109,9 +109,9 @@ def main() -> None:
         insight_card("5_后端聚合表预览", "用于诊断后端表生成状态与单表内容。")
 
     st.subheader("系统流程图")
-    shown = show_optional_figure(REPOSITORY_ROOT / "docs" / "assets" / "system_flow.png", caption="系统流程图（可选）")
+    shown = show_optional_figure(REPOSITORY_ROOT / "docs" / "assets" / "system_flow.svg", caption="系统流程图（可选）")
     if not shown:
-        st.caption("未检测到 docs/assets/system_flow.png，已跳过流程图展示。")
+        st.caption("未检测到 docs/assets/system_flow.svg，已跳过流程图展示。")
 
 
 main()

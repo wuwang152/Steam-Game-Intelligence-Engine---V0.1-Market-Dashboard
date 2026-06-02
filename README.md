@@ -100,6 +100,12 @@ Current dashboard page structure:
 
 These modules provide end-to-end views across market structure, reputation/attention, track-localization analysis, opportunity discovery, and backend aggregation table previewing.
 
+### 首页系统架构流程图
+首页新增中文三层架构流程图，用于向仓库访问者说明数据源层、处理与聚合层、Streamlit 中文展示层之间的数据血缘关系。流程图文件位于 `docs/assets/system_flow.svg`，它是可被 Git 文本 diff 追踪的 SVG 资产；如需重新生成，请运行：
+
+```bash
+python scripts/generate_system_flow_svg.py
+```
 
 ## V0.3 planning focus
 - V0.3 focuses on source transparency, UI structure, visual diversity, and presentation assets.

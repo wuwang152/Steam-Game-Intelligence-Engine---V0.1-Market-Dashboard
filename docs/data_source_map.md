@@ -33,7 +33,7 @@ This document defines the source-to-dashboard mapping for the V0.3 planning laye
 
 | Page | Required backend tables / assets |
 |---|---|
-| Home | `summary_metrics` + `docs/assets/system_flow.png` |
+| Home | `summary_metrics` + `docs/assets/system_flow.svg` |
 | 市场结构 | `yearly_release_counts`, `price_bucket_distribution`, `owners_tier_distribution`, `platform_count_distribution` + `docs/assets/market_structure_framework.png` |
 | 口碑与热度 | `review_signal_distribution`, `review_sentiment_distribution`, `review_bucket_positive_rate`, `top_games_by_reviews`, `top_rated_games` + `docs/assets/reputation_attention_logic.png` |
 | 赛道与本地化 | `genre_distribution`, `tag_distribution`, `category_distribution`, `language_support_summary`, `localization_by_genre` + `docs/assets/localization_framework.png` |
