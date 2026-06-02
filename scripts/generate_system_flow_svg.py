@@ -81,21 +81,23 @@ SVG_CONTENT = """<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="85
   <rect x="1215" y="195" width="290" height="62" rx="20" fill="#ede9fe"/>
   <text x="1360" y="237" text-anchor="middle" class="section-title">Streamlit 中文展示层</text>
 
-  <rect x="1228" y="300" width="120" height="54" rx="18" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
-  <text x="1288" y="335" text-anchor="middle" class="pill-text">首页</text>
-  <rect x="1370" y="300" width="120" height="54" rx="18" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
-  <text x="1430" y="335" text-anchor="middle" class="pill-text">市场结构</text>
+  <rect x="1225" y="292" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="321" text-anchor="middle" class="pill-text">首页</text>
 
-  <rect x="1228" y="385" width="120" height="54" rx="18" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
-  <text x="1288" y="420" text-anchor="middle" class="pill-text">口碑与热度</text>
-  <rect x="1370" y="385" width="120" height="54" rx="18" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
-  <text x="1430" y="420" text-anchor="middle" class="pill-text">赛道与本地化</text>
+  <rect x="1225" y="350" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="379" text-anchor="middle" class="pill-text">市场结构</text>
 
-  <rect x="1228" y="470" width="120" height="54" rx="18" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
-  <text x="1288" y="505" text-anchor="middle" class="pill-text">机会识别</text>
-  <rect x="1370" y="470" width="120" height="54" rx="18" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
-  <text x="1430" y="505" text-anchor="middle" class="pill-text">后端聚合</text>
-  <text x="1430" y="535" text-anchor="middle" class="small">表预览</text>
+  <rect x="1225" y="408" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="437" text-anchor="middle" class="pill-text">口碑与热度</text>
+
+  <rect x="1225" y="466" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="495" text-anchor="middle" class="pill-text">赛道与本地化</text>
+
+  <rect x="1225" y="524" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="553" text-anchor="middle" class="pill-text">机会识别</text>
+
+  <rect x="1225" y="582" width="270" height="44" rx="16" fill="#f5f3ff" stroke="#c4b5fd" stroke-width="2"/>
+  <text x="1360" y="611" text-anchor="middle" class="pill-text">后端聚合表预览</text>
 
   <path d="M 500 415 L 570 415" stroke="#0f766e" stroke-width="5" stroke-linecap="round" marker-end="url(#arrow)"/>
   <path d="M 1105 415 L 1175 415" stroke="#0f766e" stroke-width="5" stroke-linecap="round" marker-end="url(#arrow)"/>
